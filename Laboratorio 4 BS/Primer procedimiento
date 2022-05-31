@@ -6,28 +6,28 @@ INSERT INTO tipo_telefono (telefonoID, descripcion)values
 END tipo_telefonos;
 
 
-CREATE OR REPLACE PROCEDURE tipo_correo(
+CREATE OR REPLACE PROCEDURE tipo_correos(
 p_descripcion IN OUT tipo_correo.descripcion%TYPE) IS
 BEGIN 
 INSERT INTO tipo_correo(tipo_correoID, descripcion) values
 (secuencia_correo.nextval,p_descripcion);
-END tipo_Correo;
+END tipo_correos;
 
 
-CREATE OR REPLACE PROCEDURE profesion(
+CREATE OR REPLACE PROCEDURE tipo_profesion(
 p_profesion IN OUT profesion.profesion%TYPE) IS
 BEGIN 
 INSERT INTO profesion(id_profesion,profesion) values
 (secuencia_profesion.nextval,p_profesion);
-END profesion;
+END tipo_profesion;
 
 
-CREATE OR REPLACE PROCEDURE sucursal(
+CREATE OR REPLACE PROCEDURE tipo_sucursal(
 p_nombre_sucursal IN OUT sucursal.nombre_sucursal%TYPE) IS
 BEGIN 
-INSERT INTO sucursal(cod_sucursal,nombre_sucursal) values
-(secuencia_sucursal.nextval,p_nombre_sucursal);
-END sucursal;
+INSERT INTO sucursal(cod_sucursal,nombre_sucursal,monto_prestamos,cantidad) values
+(secuencia_sucursal.nextval,p_nombre_sucursal,0,0);
+END tipo_sucursal;
 
 
 CREATE OR REPLACE PROCEDURE tipo_prestamo(
@@ -39,20 +39,18 @@ END tipo_prestamo;
 
 
 DECLARE
-v_telefono Tipo_telefono.Descripcion%TYPE;
-v_correo tipo_correo.descripcion%TYPE;
-v_profesion profesion.profesion%TYPE;
-v_nombre_sucursal sucursal.nombre_sucursal%TYPE;
-v_tipo_prestamo tipo_de_prestamo.tipo_prestamo%TYPE;
+v_telefono Tipo_telefono.descripcion%TYPE:='Personal';
+v_correo tipo_correo.descripcion%TYPE:='Personal';
+v_profesion profesion.profesion%TYPE:= 'Marinero';
+v_nombre_sucursal sucursal.nombre_sucursal%TYPE:= 'Dorado';
+v_tipo_prestamo tipo_de_prestamo.tipo_prestamo%TYPE:= 'Hipotecario';
 
 
 BEGIN
-tipo_telefono(v_telefono);
-tipo_correo(v_correo);
-profesion(v_profesion);
-sucursal(v_nombre_sucursal);
+tipo_telefonos(v_telefono);
+tipo_correos(v_correo);
+tipo_profesion(v_profesion);
+tipo_sucursal(v_nombre_sucursal);
 tipo_prestamo(v_tipo_prestamo);
 
-EXCEPTION
-	
 END;
