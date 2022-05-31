@@ -1,76 +1,93 @@
-CREATE OR REPLACE PROCEDURE CalcSuc(
-    p_Cod_sucursal  IN      Sucursal.Cod_sucursal%TYPE,
-    p_montoAprobado IN      Prestamo.Monto_Aprobado%TYPE)
+CREATE OR REPLACE PROCEDURE actualizar_sucursal(
+    p_cod_sucursal  IN      sucursal.cod_sucursal%TYPE,
+    p_montoaprobado IN      prestamo.monto_aprobado%TYPE)
     AS
-    
-    
-    v_cantidad              Sucursal.cantidad%TYPE;
-    v_montoprestamo         Sucursal.monto_prestamo%TYPE;
-    CURSOR c_sucursal IS
-        SELECT Cantidad, Monto_prestamo
+    v_cantidad              sucursal.cantidad%TYPE;
+    v_montoprestamo         sucursal.monto_prestamos%TYPE;
+    CURSOR c_cal_sucursal IS
+        SELECT cantidad, monto_prestamos
         FROM sucursal
-        WHERE cod_sucursal = p_Cod_sucursal;
+        WHERE cod_sucursal = p_cod_sucursal;
 BEGIN
-    OPEN c_sucursal;
+    OPEN c_cal_sucursal;
     LOOP
-        FETCH c_sucursal INTO v_cantidad, v_montoprestamo;
-        EXIT WHEN c_sucursal%NOTFOUND;
-        UPDATE Sucursal
-        SET Cantidad = v_cantidad + 1, Monto_prestamo = v_montoprestamo+p_montoAprobado
-        WHERE Cod_sucursal = p_Cod_sucursal;
+        FETCH c_cal_sucursal INTO v_cantidad, v_montoprestamo;
+        EXIT WHEN c_cal_sucursal%NOTFOUND;
+        UPDATE sucursal
+        SET cantidad = v_cantidad + 1, monto_prestamos = v_montoprestamo+p_montoaprobado
+        WHERE cod_sucursal = p_cod_sucursal;
     END LOOP;
-    CLOSE c_sucursal;
-END CalcSuc;
-/
+    CLOSE c_cal_sucursal;
+END actualizar_sucursal;
 
-CREATE OR REPLACE PROCEDURE CalcTipoSuc(
-    p_Cod_sucursal  IN      Sucursal_Tipoprestamo.Cod_sucursal%TYPE,
-    p_montoAprobado IN      Prestamo.Monto_Aprobado%TYPE,
-    p_TipoPrestamo  IN      Sucursal_Tipoprestamo.Tipo_Prestamo%TYPE
+
+CREATE OR REPLACE PROCEDURE actual_sucursal_prestamo(
+    p_cod_sucursal  IN      sucursal_tipo_prestamo.cod_sucursal%TYPE,
+    p_montoaprobado IN      prestamo.monto_aprobado%TYPE,
+    p_tipoprestamoid  IN    sucursal_tipo_prestamo.tipo_prestamoid%TYPE
     )
     AS
 
-    v_cantidad              Sucursal.cantidad%TYPE;
-    v_montoprestamo         Sucursal.monto_prestamo%TYPE;
-    CURSOR c_Tsucursal IS
-        SELECT Cantidad, Monto_prestamo
-        FROM Sucursal_Tipoprestamo
-        WHERE cod_sucursal = p_Cod_sucursal AND Tipo_prestamo = p_TipoPrestamo;
+    v_cantidad              sucursal.cantidad%TYPE;
+    v_montoprestamo         sucursal_tipo_prestamo.monto_prestamos%TYPE;
+    CURSOR c_cal_tipo_sucursal IS
+        SELECT cantidad, monto_prestamos
+        FROM sucursal_tipo_prestamo
+        WHERE cod_sucursal = p_cod_sucursal AND tipo_prestamoid = p_tipoprestamoid;
 BEGIN
-    OPEN c_Tsucursal;
+    OPEN c_cal_tipo_sucursal;
     LOOP
-        FETCH c_Tsucursal INTO v_cantidad, v_montoprestamo;
-        EXIT WHEN c_Tsucursal%NOTFOUND;
-        UPDATE Sucursal_Tipoprestamo
-        SET Cantidad = v_cantidad + 1, Monto_prestamo = v_montoprestamo+p_montoAprobado
-        WHERE Cod_sucursal = p_Cod_sucursal AND Tipo_prestamo = p_TipoPrestamo;
+        FETCH c_cal_tipo_sucursal INTO v_cantidad, v_montoprestamo;
+        EXIT WHEN c_cal_tipo_sucursal%NOTFOUND;
+        UPDATE sucursal_tipo_prestamo
+        SET cantidad = v_cantidad + 1, monto_prestamos = v_montoprestamo+p_montoaprobado
+        WHERE cod_sucursal = p_cod_sucursal AND tipo_prestamoid = p_tipoprestamoid;
     END LOOP;
-    CLOSE c_Tsucursal;
-END CalcTipoSuc;
-/
+    CLOSE c_cal_tipo_sucursal;
+END actual_sucursal_prestamo;
 
-CREATE OR REPLACE PROCEDURE Prestamos_Aprobados(
-    p_idCliente          IN   Prestamo.ID_Cliente%TYPE,
-    p_idTipoPrestamos    IN   Prestamo.ID_TipoPrestamo%TYPE,
-    p_numPrestamo        IN   Prestamo.Num_Prestamo%TYPE,
-    p_fechaAprobado      IN   Prestamo.Fecha_Aprobado%TYPE,
-    p_montoAprobado      IN   Prestamo.Monto_Aprobado%TYPE,
-    p_tasaInteres        IN   Prestamo.Tasa_Interes%TYPE,
-    p_letraMensual       IN   Prestamo.Letra_Mensual%TYPE,
-    p_MontoPagado        IN   Prestamo.Monto_Pagado%TYPE,
-    p_fechaPago          IN   Prestamo.Fecha_Pago%TYPE,
-    p_codSucursal        IN   Prestamo.Cod_sucursal%TYPE,
-    p_saldoActual        IN   Prestamo.Saldo_actual%TYPE,
-    p_interesPagado      IN   Prestamo.Interes_pagado%TYPE,
-    p_fechaModificacion  IN   Prestamo.Fecha_modificacion%TYPE) AS
+
+CREATE OR REPLACE PROCEDURE insersion_prestamo(
+    p_clienteid IN OUT prestamo.clienteID%TYPE,
+    p_tipo_prestamo IN OUT prestamo.tipo_prestamoid%TYPE,
+    p_numero_prestamo IN OUT prestamo.numero_prestamo%TYPE,
+    p_fecha_aprobado IN OUT prestamo.fecha_aprobado%TYPE,
+    p_monto_aprobado IN OUT prestamo.monto_aprobado%TYPE,
+    p_tasa_interes IN OUT prestamo.tasa_interes%TYPE,
+    p_letra_mensual IN OUT prestamo.letra_mensual%TYPE,
+    p_monto_pagado IN OUT prestamo.monto_pagado%TYPE,
+    p_fecha_pago IN OUT prestamo.fecha_pago%TYPE,
+    p_cod_sucursal IN OUT prestamo.cod_sucursal%TYPE,
+    p_saldoactual IN OUT prestamo.saldoactual%TYPE,
+    p_interespagado IN OUT prestamo.interespagado%TYPE,
+    p_fechamodificacion IN OUT prestamo.fechamodificacion%TYPE) AS
 
 BEGIN
-    INSERT INTO Prestamo
-    VALUES(p_idCliente, p_idTipoPrestamos, p_numPrestamo, p_fechaAprobado, p_montoAprobado, p_tasaInteres, p_letraMensual,
-    p_MontoPagado, p_fechaPago, p_codSucursal, p_saldoActual, p_interesPagado, p_fechaModificacion, user);
+    INSERT INTO prestamo (clienteid, tipo_prestamoID, numero_prestamo, fecha_aprobado, monto_aprobado, tasa_interes, letra_mensual, monto_pagado, fecha_pago,cod_sucursal,saldoactual, interespagado, fechamodificacion, usuario)  values 
+    (p_clienteid,p_tipo_prestamo, p_numero_prestamo, p_fecha_aprobado, p_monto_aprobado, p_tasa_interes, p_letra_mensual, p_monto_pagado, p_fecha_pago,p_cod_sucursal,p_saldoactual, p_interespagado, p_fechamodificacion, user);
 
-    CalcSuc(p_codSucursal, p_montoAprobado);
-    CalcTipoSuc(p_codSucursal, p_montoAprobado, p_idTipoPrestamos);
+
+    actualizar_sucursal(p_cod_sucursal, p_monto_aprobado);
+    actual_sucursal_prestamo(p_cod_sucursal, p_monto_aprobado, p_tipo_prestamo);
     
-END Prestamos_Aprobados;
-/
+END insersion_prestamo;
+
+Declare
+v_clienteid prestamo.clienteID%TYPE:=1;
+v_tipo_prestamo prestamo.tipo_prestamoid%TYPE:=1;
+v_numero_prestamo  prestamo.numero_prestamo%TYPE:= 1;
+v_fecha_aprobado  prestamo.fecha_aprobado%TYPE:=TO_DATE('01/01/2022','DD/MM/YYYY');
+v_monto_aprobado  prestamo.monto_aprobado%TYPE:=21000;
+v_tasa_interes  prestamo.tasa_interes%TYPE:='5%';
+v_letra_mensual  prestamo.letra_mensual%TYPE:=1000;
+v_monto_pagado  prestamo.monto_pagado%TYPE:=7000;
+v_fecha_pago  prestamo.fecha_pago%TYPE:=TO_DATE('03/03/2022','DD/MM/YYYY');
+v_cod_sucursal prestamo.cod_sucursal%TYPE:=1;
+v_saldoactual prestamo.saldoactual%TYPE:=14000;
+v_interespagado  prestamo.interespagado%TYPE:= 350;
+v_fechamodificacion  prestamo.fechamodificacion%TYPE:=TO_DATE('03/03/2022','DD/MM/YYYY');
+
+
+Begin
+    insertar_prestamos_aprobado(v_clienteid,v_tipo_prestamo,v_numero_prestamo,v_fecha_aprobado,v_monto_aprobado,v_tasa_interes,v_letra_mensual,v_monto_pagado,v_fecha_pago,v_cod_sucursal,v_saldoactual,v_interespagado,v_fechamodificacion);
+end;
