@@ -22,13 +22,26 @@ INSERT INTO cliente (clienteID, cedula, nombre, apellido, sexo, id_profesion, fe
 end insertar_cliente;
 
 DECLARE
-v_cedula  cliente.cedula%TYPE:='8-9823-2332';
-v_nombre  cliente.nombre%TYPE:='gaby';
-v_apellido  cliente.apellido%TYPE:='apariciasdo';
-v_sexo  cliente.sexo%TYPE:='F';
+v_cedula  cliente.cedula%TYPE:='8-977-47';
+v_nombre  cliente.nombre%TYPE:='Joel';
+v_apellido  cliente.apellido%TYPE:='aparicio';
+v_sexo  cliente.sexo%TYPE:='M';
 v_profesion cliente.id_profesion%TYPE:=1;
 v_fechanacimiento  cliente.fecha_nacimiento%TYPE:=TO_DATE('01/12/1994','DD/MM/YYYY');
 v_sucursal cliente.cod_sucursal%TYPE:=1;
+
+BEGIN
+    insertar_cliente(v_cedula,v_nombre,v_apellido,v_sexo,v_profesion,v_fechanacimiento,v_sucursal);
+END;
+
+DECLARE
+v_cedula  cliente.cedula%TYPE:='8-973-789';
+v_nombre  cliente.nombre%TYPE:='Airlenys';
+v_apellido  cliente.apellido%TYPE:='Recuero';
+v_sexo  cliente.sexo%TYPE:='F';
+v_profesion cliente.id_profesion%TYPE:=2;
+v_fechanacimiento  cliente.fecha_nacimiento%TYPE:=TO_DATE('01/12/1999','DD/MM/YYYY');
+v_sucursal cliente.cod_sucursal%TYPE:=2;
 
 BEGIN
     insertar_cliente(v_cedula,v_nombre,v_apellido,v_sexo,v_profesion,v_fechanacimiento,v_sucursal);
