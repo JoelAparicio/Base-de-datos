@@ -54,3 +54,21 @@ tipo_sucursal(v_nombre_sucursal);
 tipo_prestamo(v_tipo_prestamo);
 
 END;
+
+
+DECLARE
+v_telefono Tipo_telefono.descripcion%TYPE:='Casa';
+v_correo tipo_correo.descripcion%TYPE:='Laboral';
+v_profesion profesion.profesion%TYPE:= 'Camarero';
+v_nombre_sucursal sucursal.nombre_sucursal%TYPE:= 'Altaplaza';
+v_tipo_prestamo tipo_de_prestamo.tipo_prestamo%TYPE:= 'Personal';
+
+
+BEGIN
+tipo_telefonos(v_telefono);
+tipo_correos(v_correo);
+tipo_profesion(v_profesion);
+tipo_sucursal(v_nombre_sucursal);
+tipo_prestamo(v_tipo_prestamo);
+
+END;
