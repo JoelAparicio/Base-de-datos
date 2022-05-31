@@ -1,0 +1,102 @@
+DECLARE
+v_codigoid Colaboradores.id_codcolaborador%TYPE;
+v_squincenal Salario_quincenal.Salario_quincenal%TYPE;
+v_smensual colaboradores.Salario_mensual%TYPE;
+v_seguro_social Salario_quincenal.seguro_social%TYPE;
+v_seguro_educativo Salario_quincenal.seguro_educativo%TYPE;
+v_sneto Salario_quincenal.salario_neto%TYPE;
+CURSOR crsr_colaboradores is
+	select id_codcolaborador,Salario_mensual
+	from colaboradores
+	where status = 'A';
+    
+BEGIN
+OPEN crsr_colaboradores;
+loop
+ 	FETCH crsr_colaboradores into v_codigoid,v_smensual;
+ 	v_squincenal:=v_smensual/2;
+ 	v_seguro_social:=v_squincenal * 0.0975;
+ 	v_seguro_educativo:=v_squincenal * 0.0125;
+ 	v_sneto:=v_squincenal - v_seguro_social - v_seguro_educativo;
+ 	EXIT when crsr_colaboradores%NOTFOUND;
+ 	insert into Salario_quincenal values 
+ 	(secid_salario.nextval,v_codigoid,sysdate,v_squincenal,v_seguro_social,v_seguro_educativo,v_sneto);
+ end loop; 
+ CLOSE crsr_colaboradores;
+
+EXCEPTION
+  when DUP_VAL_ON_INDEX then
+  	DBMS_OUTPUT.PUT_LINE('Valores duplicados');
+  when others then
+    DBMS_OUTPUT.PUT_LINE('Error desconocido');
+commit;
+END;
+/
+
+
+create view Vista_Salario as
+  select c.id_codcolaborador as "codigo",c.nombre as "nombre",c.apellido as "apellido",c.salario_mensual as "salario Mensual",s.salario_quincenal as "Salario Quincenal",s.seguro_social as "seguro social",s.seguro_educativo as "seguro educativo",s.salario_neto as "salario neto"
+  from colaboradores c , salario_quincenal s
+  where s.id_codcolaborador=c.id_codcolaborador;
+
+select *
+   from Vista_Salario;
+
+
+
+
+CREATE TABLE colaboradores ( 
+ id_codcolaborador number(10), 
+ nombre varchar2(25), 
+ apellido varchar2(25), 
+ cedula varchar2(12), 
+ sexo char, 
+ fecha_nacimiento date, 
+ fecha_ingreso date, 
+ status char, 
+ salario_mensual number(15,2), 
+ CONSTRAINT pk_idcodcolaborador PRIMARY KEY (id_codcolaborador)); 
+
+ 
+
+CREATE TABLE salario_quincenal ( 
+ id_salario number ,  
+ id_codcolaborador number,  
+ fecha_pago date,  
+ salario_quincenal number(15,2),  
+ seguro_social number(15,2),  
+ seguro_educativo number(15,2),  
+ salario_neto number(15,2), 
+ CONSTRAINT pk_idsalario PRIMARY KEY (id_salario), 
+ CONSTRAINT fk_codcolaborador  FOREIGN KEY (id_codcolaborador) 
+ REFERENCES colaboradores(id_codcolaborador)); 
+
+ 
+
+INSERT INTO Colaboradores(id_codcolaborador, nombre, apellido, cedula, sexo, fecha_nacimiento, fecha_ingreso , status, salario_mensual) 
+values(210,'Joel', 'Aparicio', '8-977-47', 'M',TO_DATE('01/12/2001','DD/MM/YYYY'),TO_DATE('02/04/2021','DD/MM/YYYY'), 'A', 1500); 
+
+ 
+
+INSERT INTO Colaboradores(id_codcolaborador, nombre, apellido, cedula, sexo, fecha_nacimiento, fecha_ingreso , status, salario_mensual) 
+values(211,'Oliver', 'Pineda', '8-944-778', 'M',TO_DATE('21/10/2001','DD/MM/YYYY'),TO_DATE('03/05/2021','DD/MM/YYYY'), 'A', 1500); 
+
+
+INSERT INTO Colaboradores(id_codcolaborador, nombre, apellido, cedula, sexo, fecha_nacimiento, fecha_ingreso , status, salario_mensual) 
+values(212,'Gabriela', 'Vásquez', '8-987-1128', 'M',TO_DATE('18/09/2002','DD/MM/YYYY'),TO_DATE('02/06/2021','DD/MM/YYYY'), 'A', 2000); 
+
+ 
+
+INSERT INTO Colaboradores(id_codcolaborador, nombre, apellido, cedula, sexo, fecha_nacimiento, fecha_ingreso , status, salario_mensual) 
+values(213,'Michael', 'Cerrud', '8-987-1128', 'M',TO_DATE('26/03/2002','DD/MM/YYYY'),TO_DATE('04/07/2021','DD/MM/YYYY'), 'V', 2500); 
+
+ 
+
+INSERT INTO Colaboradores(id_codcolaborador, nombre, apellido, cedula, sexo, fecha_nacimiento, fecha_ingreso , status, salario_mensual) 
+values(214, 'Jimmy', 'Santoyo', '8-973-789', 'M',TO_DATE('21/07/2001','DD/MM/YYYY'),TO_DATE('20/05/2021','DD/MM/YYYY'), 'R', 2300); 
+
+CREATE SEQUENCE secid_salario 
+ MINVALUE 1 
+ START WITH 1 
+ INCREMENT BY 1 
+ NOCACHE; 

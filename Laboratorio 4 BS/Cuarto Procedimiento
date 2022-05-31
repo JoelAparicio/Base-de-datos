@@ -1,0 +1,20 @@
+CREATE OR REPLACE PROCEDURE Nueva_Trans_Pago (
+    p_cod_sucursal       transacpagos.cod_sucursal%TYPE,
+    p_id_cliente         transacpagos.id_cliente%TYPE,
+    p_tipo_prestamo      transacpagos.tipo_prestamo%TYPE,
+    p_fecha_transaccion  transacpagos.fecha_transaccion%TYPE,
+    p_monto_del_pago     transacpagos.monto_pago%TYPE,
+    p_fecha_insercion    transacpagos.fecha_insercion%TYPE) IS  
+BEGIN
+INSERT INTO transacpagos (id_transaccion,cod_sucursal, id_cliente, tipo_prestamo, fecha_transaccion, monto_pago, fecha_insercion, usuario)
+VALUES (secuencia_transaccion.nextval, p_cod_sucursal, p_id_cliente, p_tipo_prestamo, p_fecha_transaccion, p_monto_del_pago, p_fecha_insercion, user);
+END Nueva_Trans_Pago;
+
+BEGIN
+Nueva_Trans_Pago (2, 2, 2, 1, TO_DATE('06/05/2019','DD/MM/YYYY'), 250.00, TO_DATE('17/11/2020','DD/MM/YYYY'), 'Joel'); 
+END;
+
+
+BEGIN
+Nueva_Trans_Pago (3, 3, 3, 2, TO_DATE('19/11/2020','DD/MM/YYYY'), 100.00, TO_DATE('17/11/2020','DD/MM/YYYY'), 'Gabi');
+END;

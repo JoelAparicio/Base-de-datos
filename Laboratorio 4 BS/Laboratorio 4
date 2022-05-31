@@ -1,0 +1,327 @@
+CREATE TABLE tipo_correo(
+    tipo_correoID number (10),
+    descripcion varchar2 (75) not null,
+    CONSTRAINT tipo_correoID_pk PRIMARY KEY (tipo_correoID));
+CREATE TABLE tipo_telefono(
+    telefonoID number (10),
+    descripcion varchar2 (50) not null,
+    CONSTRAINT telefonoID_pk PRIMARY KEY (telefonoID));
+CREATE TABLE tipo_de_prestamo(
+    tipo_prestamoID number (10),
+    tipo_prestamo varchar2 (200) NOT NULL,
+    CONSTRAINT id_tipo_prestamo_pk PRIMARY KEY (tipo_prestamoID));
+CREATE TABLE profesion(
+    id_profesion number(10),
+    profesion VARCHAR2(150) NOT NULL,
+    CONSTRAINT id_profesion PRIMARY KEY (id_profesion));
+CREATE TABLE cliente(
+    clienteID number(10),
+    cedula varchar2(12) not null,
+    nombre varchar2(25) not null,
+    apellido varchar2(25) not null,
+    sexo char not null,
+    id_profesion number (10),
+    fecha_nacimiento date,
+    CONSTRAINT clienteID PRIMARY KEY (clienteID),
+    CONSTRAINT fk_id_profesion FOREIGN KEY (id_profesion) REFERENCES profesion(id_profesion));
+CREATE TABLE correo(
+    clienteID number(10),
+    tipo_correoID number (10),
+    correo VARCHAR2(100) not null,
+    CONSTRAINT clienteID_tipo_correo_pk PRIMARY KEY (clienteID,tipo_correoID),
+    CONSTRAINT clienteID_correo_fk FOREIGN KEY (clienteID) REFERENCES cliente(clienteID),
+    CONSTRAINT tipo_correoID_fk FOREIGN KEY (tipo_correoID) REFERENCES tipo_correo(tipo_correoID));
+CREATE TABLE telefono(
+    clienteID number(10),
+    telefonoID number (10),
+    telefono varchar (9) not null,
+    CONSTRAINT clienteID_telefonoID_pk PRIMARY KEY (clienteID,telefonoID),
+    CONSTRAINT clienteID_telefono_fk FOREIGN KEY (clienteID) REFERENCES cliente(clienteID),
+    CONSTRAINT telefonoID_fk FOREIGN KEY (telefonoID) REFERENCES tipo_telefono(telefonoID));
+CREATE TABLE prestamo(
+    clienteID number(10),
+    tipo_prestamoID number (10),
+    numero_prestamo number (10) NOT NULL,
+    fecha_aprobado date NOT NULL,
+    monto_aprobado number (13) NOT NULL,
+    tasa_interes varchar2 (10) NOT NULL,
+    letra_mensual number (10) NOT NULL,
+    monto_pagado number (13) NOT NULL,
+    fecha_pago date NOT NULL,
+    CONSTRAINT clienteID_id_tipo_prestamo_pk PRIMARY KEY (clienteID,tipo_prestamoID),
+    CONSTRAINT fk_cliente_id FOREIGN KEY (clienteID) REFERENCES cliente(clienteID),
+    CONSTRAINT fk_tipo_prestamo FOREIGN KEY (tipo_prestamoID) REFERENCES tipo_de_prestamo(tipo_prestamoID));
+
+INSERT INTO tipo_de_prestamo (tipo_prestamoID, tipo_prestamo)
+  VALUES (1,'personal');
+INSERT INTO tipo_de_prestamo (tipo_prestamoID, tipo_prestamo)
+  VALUES (2,'automovil');
+INSERT INTO tipo_de_prestamo (tipo_prestamoID, tipo_prestamo)
+  VALUES (3,'hipoteca');
+INSERT INTO tipo_de_prestamo (tipo_prestamoID, tipo_prestamo)
+  VALUES (4,'garantizado para ahorros');
+INSERT INTO tipo_telefono (telefonoID, descripcion)
+  VALUES (1,'celular');
+INSERT INTO tipo_telefono (telefonoID, descripcion)
+  VALUES (2,'residencial');
+INSERT INTO tipo_telefono (telefonoID, descripcion)
+  VALUES (3,'celular de familiar');
+INSERT INTO tipo_telefono (telefonoID, descripcion)
+  VALUES (4,'celular del conyugue');
+INSERT INTO tipo_correo (tipo_correoID, descripcion)
+  VALUES (1,'personal');
+INSERT INTO tipo_correo (tipo_correoID, descripcion)
+  VALUES (2,'laboral');
+INSERT INTO tipo_correo (tipo_correoID, descripcion)
+  VALUES (3,'academico');
+INSERT INTO profesion (id_profesion, profesion)
+  VALUES (1,'medico general');
+INSERT INTO profesion (id_profesion, profesion)
+  VALUES (2,'ingeniero civil');
+INSERT INTO profesion (id_profesion, profesion)
+  VALUES (3,'veterinario');
+INSERT INTO profesion (id_profesion, profesion)
+  VALUES (4,'transportista');
+INSERT INTO profesion (id_profesion, profesion)
+  VALUES (5,'profesor de biologia');
+INSERT INTO cliente (clienteID, cedula, nombre, apellido, sexo, id_profesion, fecha_nacimiento)
+  VALUES (1,'8-883-4832', 'Emily', 'Rosario', 'F', 5, TO_DATE('29/06/1992','DD/MM/YYYY'));
+INSERT INTO cliente (clienteID, cedula, nombre, apellido, sexo, id_profesion, fecha_nacimiento)
+  VALUES (2,'8-987-1128', 'Carlos', 'Vergara', 'M', 3, TO_DATE('14/01/1988','DD/MM/YYYY'));
+INSERT INTO cliente (clienteID, cedula, nombre, apellido, sexo, id_profesion, fecha_nacimiento)
+  VALUES (3,'8-975-3746', 'Ariel', 'Collantes', 'M', 1, TO_DATE('21/05/1981','DD/MM/YYYY'));
+INSERT INTO cliente (clienteID, cedula, nombre, apellido, sexo, id_profesion, fecha_nacimiento)
+  VALUES (4,'8-482-378', 'Cesar', 'Rapson', 'M', 2, TO_DATE('30/03/1986','DD/MM/YYYY'));
+INSERT INTO cliente (clienteID, cedula, nombre, apellido, sexo, id_profesion, fecha_nacimiento)
+  VALUES (5,'8-2958-068', 'Cecydi', 'Rodriguez', 'F', 4, TO_DATE('02/12/1998','DD/MM/YYYY'));
+INSERT INTO correo (clienteID, tipo_correoID, correo)
+  VALUES (1,1,'emily.fong@gmail.com');
+INSERT INTO correo (clienteID, tipo_correoID, correo)
+  VALUES (2,2,'carlos.restrepo@gmail.com');
+INSERT INTO correo (clienteID, tipo_correoID, correo)
+  VALUES (3,3,'ariel.gutierrez@gmail.com');
+INSERT INTO correo (clienteID, tipo_correoID, correo)
+  VALUES (4,2,'cesar.rodriguez@gmail.com');
+INSERT INTO correo (clienteID, tipo_correoID, correo)
+  VALUES (5,1,'cecydi.bethancourt@gmail.com');
+INSERT INTO telefono (clienteID, telefonoID, telefono)
+  VALUES (1,1,'6178-8964');
+INSERT INTO telefono (clienteID, telefonoID, telefono)
+  VALUES (2,3,'6286-9375');
+INSERT INTO telefono (clienteID, telefonoID, telefono)
+  VALUES (3,4,'6093-5380');
+INSERT INTO telefono (clienteID, telefonoID, telefono)
+  VALUES (4,3,'6127-0368');
+INSERT INTO telefono (clienteID, telefonoID, telefono)
+  VALUES (5,2,'238-4562');
+INSERT INTO prestamo (clienteID, tipo_prestamoID, numero_prestamo, fecha_aprobado, monto_aprobado, tasa_interes, letra_mensual, monto_pagado, fecha_pago)
+  VALUES (1,1,1,TO_DATE('29/01/2022','DD/MM/YYYY'), 1000, '2%', 100, 500,TO_DATE('29/06/2022','DD/MM/YYYY'));
+INSERT INTO prestamo (clienteID, tipo_prestamoID, numero_prestamo, fecha_aprobado, monto_aprobado, tasa_interes, letra_mensual, monto_pagado, fecha_pago)
+  VALUES (2,3,1,TO_DATE('13/02/2022','DD/MM/YYYY'), 100000, '10%', 10000, 30000,TO_DATE('13/05/2022','DD/MM/YYYY'));
+INSERT INTO prestamo (clienteID, tipo_prestamoID, numero_prestamo, fecha_aprobado, monto_aprobado, tasa_interes, letra_mensual, monto_pagado, fecha_pago)
+  VALUES (3,2,1,TO_DATE('01/03/2021','DD/MM/YYYY'), 50000, '9%', 1000, 10000,TO_DATE('01/01/2022','DD/MM/YYYY'));
+INSERT INTO prestamo (clienteID, tipo_prestamoID, numero_prestamo, fecha_aprobado, monto_aprobado, tasa_interes, letra_mensual, monto_pagado, fecha_pago)
+  VALUES (4,3,1,TO_DATE('16/10/2020','DD/MM/YYYY'), 300000, '15%', 20000, 100000,TO_DATE('16/03/2021','DD/MM/YYYY'));
+INSERT INTO prestamo (clienteID, tipo_prestamoID, numero_prestamo, fecha_aprobado, monto_aprobado, tasa_interes, letra_mensual, monto_pagado, fecha_pago)
+  VALUES (5,4,1,TO_DATE('19/09/2020','DD/MM/YYYY'), 5000, '20%', 500, 2000,TO_DATE('19/01/2021','DD/MM/YYYY'));
+
+create view cliente_prestamo as
+select c.clienteid as "Codigo de cliente",c.nombre || ' ' ||c.apellido as "Cliente",
+c.cedula as "Cedula", t.tipo_prestamo as "Tipo de prestamo",p.fecha_aprobado as "Fecha de aprobacion",
+p.monto_aprobado as "Monto aprobado", p.tasa_interes as "Tasa de interes", p.letra_mensual as "Letra mensual",
+p.monto_pagado as "Monto pagado" , p.fecha_pago as "Fecha de pago"
+from cliente c , tipo_de_prestamo t, prestamo p
+where c.clienteid = p.clienteid and t.tipo_prestamoid = p.tipo_prestamoid
+order by c.clienteid asc;
+
+create view cliente_personal as
+select c.clienteid as "Codigo de cliente",c.nombre || ' ' ||c.apellido as "Cliente",
+c.cedula as "Cedula", t.tipo_prestamo as "Tipo de prestamo"
+from cliente c , tipo_de_prestamo t, prestamo p
+where c.clienteid = p.clienteid and t.tipo_prestamoid = p.tipo_prestamoid and t.tipo_prestamo = 'personal';
+
+create view cliente_hipoteca as
+select c.clienteid as "Codigo de cliente",c.nombre || ' ' ||c.apellido as "Cliente",
+c.cedula as "Cedula", t.tipo_prestamo as "Tipo de prestamo"
+from cliente c , tipo_de_prestamo t, prestamo p
+where c.clienteid = p.clienteid and t.tipo_prestamoid = p.tipo_prestamoid  and t.tipo_prestamo = 'hipoteca';
+
+create view cliente_automovil as
+select c.clienteid as "Codigo de cliente",c.nombre || ' ' ||c.apellido as "Cliente",
+c.cedula as "Cedula", t.tipo_prestamo as "Tipo de prestamo"
+from cliente c , tipo_de_prestamo t, prestamo p
+where c.clienteid = p.clienteid and t.tipo_prestamoid = p.tipo_prestamoid  and t.tipo_prestamo = 'automovil';
+
+create view cliente_ahorros as
+select c.clienteid as "Codigo de cliente",c.nombre || ' ' ||c.apellido as "Cliente",
+c.cedula as "Cedula", t.tipo_prestamo as "Tipo de prestamo"
+from cliente c , tipo_de_prestamo t, prestamo p
+where c.clienteid = p.clienteid and t.tipo_prestamoid = p.tipo_prestamoid  and t.tipo_prestamo = 'garantizado para ahorros';
+
+select * from cliente_prestamo;
+
+
+
+
+
+
+BASURA*****
+select calcular_edad(fecha_nacimiento) as edad
+from cliente
+where clienteID = 1;
+
+
+
+
+
+INSERT INTO profesion (id_profesion,profesion)
+  VALUES (1,'camarero');
+
+INSERT INTO cliente (clienteID, cedula, nombre, apellido, sexo, id_profesion, fecha_nacimiento,cod_sucursal)
+  VALUES (1,'8-883-4832', 'Emily', 'Rosario', 'F', 1, TO_DATE('29/06/1992','DD/MM/YYYY'),1);
+  
+  INSERT INTO sucursal (cod_sucursal,nombre_sucursal,monto_prestamos,cantidad)
+  VALUES (1,'dorado', 23000, 34);
+
+
+
+  insertar_cliente(1,34543,asdas,asdasd,m,1,TO_DATE('01/12/2001','DD/MM/YYYY'),1)
+
+
+
+  p_edad := calcular_edad(p_fechanacimiento);
+INSERT INTO cliente (edad) values
+(p_edad);
+
+
+
+
+
+CREATE OR REPLACE PROCEDURE insertar_cliente(
+p_clienteid IN OUT cliente.clienteID%TYPE,
+p_cedula IN OUT cliente.cedula%TYPE,
+p_nombre IN OUT cliente.nombre%TYPE,
+p_apellido IN OUT cliente.apellido%TYPE,
+p_sexo IN OUT cliente.sexo%TYPE,
+p_idprofesion IN OUT cliente.id_profesion%TYPE,
+p_fechanacimiento IN OUT cliente.fecha_nacimiento%TYPE,
+p_edad OUT cliente.edad%TYPE,
+p_cod_sucursal IN OUT cliente.cod_sucursal%TYPE) IS 
+BEGIN
+INSERT INTO cliente (clienteID, cedula, nombre, apellido, sexo, id_profesion, fecha_nacimiento, cod_sucursal) values
+(p_clienteid,p_cedula,p_nombre,p_apellido,p_sexo,p_idprofesion,p_fechanacimiento,p_cod_sucursal);
+end insertar_cliente;
+
+Declare
+v_clienteid  cliente.clienteID%TYPE:= 1;
+v_cedula  cliente.cedula%TYPE:='8-988-8834';
+v_nombre  cliente.nombre%TYPE:='joel';
+v_apellido  cliente.apellido%TYPE:='aparicio';
+v_sexo  cliente.sexo%TYPE:='m';
+v_idprofesion  cliente.id_profesion%TYPE:=1;
+v_fechanacimiento  cliente.fecha_nacimiento%TYPE:=TO_DATE('01/12/2001','DD/MM/YYYY');
+v_cod_sucursal cliente.cod_sucursal%TYPE:=1;
+
+Begin
+    insertar_cliente(v_clienteid,v_cedula,v_nombre,v_apellido,v_sexo,v_idprofesion,v_fechanacimiento,v_cod_sucursal);
+end;
+
+
+
+
+CREATE OR REPLACE PROCEDURE insertar_cliente(
+p_cedula IN OUT cliente.cedula%TYPE,
+p_nombre IN OUT cliente.nombre%TYPE,
+p_apellido IN OUT cliente.apellido%TYPE,
+p_sexo IN OUT cliente.sexo%TYPE,
+p_fechanacimiento IN OUT cliente.fecha_nacimiento%TYPE,
+p_edad IN OUT cliente.edad%TYPE)AS
+BEGIN
+INSERT INTO cliente (clienteID, cedula, nombre, apellido, sexo, id_profesion, fecha_nacimiento, cod_sucursal,edad) values
+(SECUENCIA_CLIENTE.nextval,p_cedula,p_nombre,p_apellido,p_sexo,SECUENCIA_PROFESION.nextval,p_fechanacimiento,SECUENCIA_SUCURSAL.nextval,calcular_edad(p_fechanacimiento));
+end insertar_cliente;
+
+Declare
+v_clienteid  cliente.clienteID%TYPE:= 1;
+v_cedula  cliente.cedula%TYPE:='8-988-8834';
+v_nombre  cliente.nombre%TYPE:='joel';
+v_apellido  cliente.apellido%TYPE:='aparicio';
+v_sexo  cliente.sexo%TYPE:='m';
+v_fechanacimiento  cliente.fecha_nacimiento%TYPE:=TO_DATE('01/12/2001','DD/MM/YYYY');
+v_cod_sucursal cliente.cod_sucursal%TYPE:=1;
+
+Begin
+    insertar_cliente(v_cedula,v_nombre,v_apellido,v_sexo,v_fechanacimiento);
+end;
+
+
+
+
+
+
+
+
+
+
+
+
+CREATE OR REPLACE PROCEDURE insertar_prestamos_aprobado(
+p_numero_prestamo IN OUT prestamo.numero_prestamo%TYPE,
+p_fecha_aprobado IN OUT prestamo.fecha_aprobado%TYPE,
+p_monto_aprobado IN OUT prestamo.monto_aprobado%TYPE,
+p_tasa_interes IN OUT prestamo.tasa_interes%TYPE,
+p_letra_mensual IN OUT prestamo.letra_mensual%TYPE,
+p_monto_pagado IN OUT prestamo.monto_pagado%TYPE,
+p_fecha_pago IN OUT prestamo.fecha_pago%TYPE,
+p_saldoactual IN OUT prestamo.saldoactual%TYPE,
+p_interespagado IN OUT prestamo.interespagado%TYPE,
+p_fechamodificacion IN OUT prestamo.fechamodificacion%TYPE,
+
+p_cod_sucursal IN OUT sucursal.cod_sucursal%TYPE,
+p_monto_prestamos IN OUT sucursal.monto_prestamos%TYPE,
+p_cantidad_prestamo IN OUT sucursal.cantidad%TYPE,
+
+p_tipo_prestamoID IN OUT Sucursal_tipo_prestamo.tipo_prestamoID%TYPE,
+p_monto_Tipo_prestamos IN OUT Sucursal_tipo_prestamo.monto_prestamos%TYPE,
+p_cantidad_Tipo_prestamo IN OUT Sucursal_tipo_prestamo.cantidad%TYPE
+) IS 
+
+BEGIN
+
+INSERT INTO prestamo (clienteid, tipo_prestamoID, numero_prestamo, fecha_aprobado, monto_aprobado, tasa_interes, letra_mensual, monto_pagado, fecha_pago,cod_sucursal,saldoactual, interespagado, fechamodificacion, usuario)  values 
+(SECUENCIA_CLIENTE.nextval, SECUENCIA_PRESTAMO.nextval, p_numero_prestamo, p_fecha_aprobado, p_monto_aprobado, p_tasa_interes, p_letra_mensual, p_monto_pagado, p_fecha_pago,secuencia_sucursal.nextval,p_saldoactual, p_interespagado, p_fechamodificacion, user);
+
+UPDATE sucursal
+SET p_monto_prestamos := p_monto_prestamos + p_monto_aprobado;
+WHERE p_cod_sucursal := cod_sucursal;
+
+UPDATE sucursal
+SET p_cantidad_prestamo := p_cantidad_prestamo + 1
+WHERE p_cod_sucursal := cod_sucursal;
+
+UPDATE Sucursal_tipo_prestamo
+SET p_monto_Tipo_prestamos := p_monto_Tipo_prestamos + p_monto_aprobado;
+WHERE p_tipo_prestamoID := tipo_prestamoID
+
+UPDATE Sucursal_tipo_prestamo
+SET p_cantidad_prestamo := p_cantidad_prestamo + 1
+WHERE p_tipo_prestamoID := tipo_prestamoID;
+
+END insertar_prestamos_aprobado;
+
+Declare
+v_numero_prestamo  prestamo.numero_prestamo%TYPE:= 1;
+v_fecha_aprobado  prestamo.fecha_aprobado%TYPE:=TO_DATE('01/01/2022','DD/MM/YYYY');
+v_monto_aprobado  prestamo.monto_aprobado%TYPE:=20000;
+v_tasa_interes  prestamo.tasa_interes%TYPE:='5%' ;
+v_letra_mensual  prestamo.letra_mensual%TYPE:=1000 ;
+v_monto_pagado  prestamo.monto_pagado%TYPE:=7000;
+v_fecha_pago  prestamo.fecha_pago%TYPE:=TO_DATE('03/03/2022','DD/MM/YYYY');
+v_saldoactual prestamo.saldoactual%TYPE:=13000;
+v_interespagado  prestamo.interespagado%TYPE:= 350;
+v_fechamodificacion  prestamo.fechamodificacion%TYPE:=TO_DATE('03/03/2022','DD/MM/YYYY');
+
+
+Begin
+    insertar_prestamos_aprobado(v_numero_prestamo,v_fecha_aprobado,v_monto_aprobado,v_tasa_interes,v_letra_mensual,v_monto_pagado,v_fecha_pago,v_saldoactual,v_interespagado,v_fechamodificacion);
+end;

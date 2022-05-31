@@ -1,0 +1,35 @@
+ALTER SESSION SET nls_date_format='DD/MM/YYYY'; *COMANDO VITAL PARA FORMATO DE FECHA*
+CREATE OR REPLACE FUNCTION calcular_edad(p_calculo_edad IN cliente.fecha_nacimiento%TYPE) 
+RETURN NUMBER
+AS
+v_edad NUMBER;
+BEGIN
+SELECT FLOOR(months_between(sysdate,p_calculo_edad)/12) INTO v_edad FROM dual;
+RETURN v_edad;
+END calcular_edad;
+
+CREATE OR REPLACE PROCEDURE insertar_cliente(
+p_cedula IN OUT cliente.cedula%TYPE,
+p_nombre IN OUT cliente.nombre%TYPE,
+p_apellido IN OUT cliente.apellido%TYPE,
+p_sexo IN OUT cliente.sexo%TYPE,
+p_profesion IN OUT cliente.id_profesion%TYPE,
+p_fechanacimiento IN OUT cliente.fecha_nacimiento%TYPE,
+p_sucursal IN OUT cliente.cod_sucursal%TYPE) IS 
+BEGIN
+INSERT INTO cliente (clienteID, cedula, nombre, apellido, sexo, id_profesion, fecha_nacimiento, cod_sucursal, edad) values
+(SECUENCIA_CLIENTE.nextval,p_cedula,p_nombre,p_apellido,p_sexo,p_profesion,p_fechanacimiento,p_sucursal, calcular_edad(p_fechanacimiento));
+end insertar_cliente;
+
+DECLARE
+v_cedula  cliente.cedula%TYPE:='8-9823-2332';
+v_nombre  cliente.nombre%TYPE:='gaby';
+v_apellido  cliente.apellido%TYPE:='apariciasdo';
+v_sexo  cliente.sexo%TYPE:='F';
+v_profesion cliente.id_profesion%TYPE:=1;
+v_fechanacimiento  cliente.fecha_nacimiento%TYPE:=TO_DATE('01/12/1994','DD/MM/YYYY');
+v_sucursal cliente.cod_sucursal%TYPE:=1;
+
+BEGIN
+    insertar_cliente(v_cedula,v_nombre,v_apellido,v_sexo,v_profesion,v_fechanacimiento,v_sucursal);
+END;

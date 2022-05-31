@@ -1,0 +1,26 @@
+DECLARE
+
+v_IDStudents  students.ID_Students%TYPE;
+v_NumStudents  students.Num_Students%TYPE;
+v_FirstName students.First_Name%TYPE;
+v_LastName  students.Last_Name%TYPE;
+v_Calification  students.Calification%TYPE;
+v_control NUMBER;
+v_counter BINARY_INTEGER:=1;
+v_mensaje VARCHAR2 (50):='¿Cuántos registros desea ingresar?';
+
+BEGIN
+
+DBMS_OUTPUT.PUT_LINE(v_mensaje);
+v_control:= &cantidad;
+WHILE v_counter <= v_control LOOP
+v_IDStudents:='&Cedula';
+v_NumStudents:= &numero;
+v_FirstName:='&Nombre';
+v_LastName:='&Apellido';
+v_Calification:=&calificacion;
+INSERT INTO students(ID_Students, Num_Students, First_Name, Last_Name, Calification)
+VALUES(v_IDStudents, v_NumStudents, v_FirstName, v_LastName, v_Calification);
+v_counter:= v_counter + 1;
+END LOOP;
+END;

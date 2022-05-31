@@ -1,0 +1,15 @@
+DECLARE
+v_ciudad VARCHAR2(50);
+BEGIN
+v_ciudad:='&capture';
+CASE
+WHEN v_ciudad = 'Madrid' OR v_ciudad = 'madrid' THEN
+DBMS_OUTPUT.PUT_LINE ('Equipo: Real Madrid');
+WHEN v_ciudad = 'Barcelona' OR v_ciudad = 'barcelona' THEN
+DBMS_OUTPUT.PUT_LINE ('Equipo: FC Barcelona');
+WHEN v_ciudad = 'Malaga' OR v_ciudad = 'malaga' THEN
+DBMS_OUTPUT.PUT_LINE ('Equipo: FC Malaga');
+ELSE DBMS_OUTPUT.PUT_LINE ('Equipo no existe');
+END CASE;
+END;
+/
