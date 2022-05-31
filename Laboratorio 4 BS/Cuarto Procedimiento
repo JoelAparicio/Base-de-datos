@@ -1,12 +1,12 @@
 CREATE OR REPLACE PROCEDURE insertar_transaccion (
     p_cod_sucursal      IN OUT transacpagos.cod_sucursal%TYPE,
-    p_id_cliente        IN OUT transacpagos.id_cliente%TYPE,
-    p_tipo_prestamo     IN OUT transacpagos.tipo_prestamo%TYPE,
+    p_id_cliente        IN OUT transacpagos.clienteid%TYPE,
+    p_tipo_prestamo     IN OUT transacpagos.tipo_prestamoid%TYPE,
     p_fecha_transaccion IN OUT transacpagos.fecha_transaccion%TYPE,
-    p_monto_del_pago    IN OUT transacpagos.monto_pago%TYPE,
+    p_monto_del_pago    IN OUT transacpagos.monto_del_pago%TYPE,
     p_fecha_insercion   IN OUT transacpagos.fecha_insercion%TYPE) IS  
 BEGIN
-INSERT INTO transacpagos (id_transaccion,cod_sucursal, id_cliente, tipo_prestamo, fecha_transaccion, monto_pago, fecha_insercion, usuario)
+INSERT INTO transacpagos (id_transaccion,cod_sucursal, clienteid, tipo_prestamoid, fecha_transaccion, monto_del_pago, fecha_insercion, usuario)
 VALUES (secuencia_transaccion.nextval, p_cod_sucursal, p_id_cliente, p_tipo_prestamo, p_fecha_transaccion, p_monto_del_pago, p_fecha_insercion, user);
 END insertar_transaccion;
 
