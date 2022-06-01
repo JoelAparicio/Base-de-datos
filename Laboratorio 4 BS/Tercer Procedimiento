@@ -111,3 +111,93 @@ v_fechamodificacion  prestamo.fechamodificacion%TYPE:=TO_DATE('03/07/2021','DD/M
 Begin
     insertar_prestamos_aprobado(v_clienteid,v_tipo_prestamo,v_numero_prestamo,v_fecha_aprobado,v_monto_aprobado,v_tasa_interes,v_letra_mensual,v_monto_pagado,v_fecha_pago,v_cod_sucursal,v_saldoactual,v_interespagado,v_fechamodificacion);
 end;
+
+---------------------------------------------------------------------------------------------
+
+
+
+---------------------------------------
+
+CREATE OR REPLACE PROCEDURE insersion_prestamo(
+    p_clienteid IN OUT prestamo.clienteID%TYPE,
+    p_tipo_prestamo IN OUT prestamo.tipo_prestamoid%TYPE,
+    p_numero_prestamo IN OUT prestamo.numero_prestamo%TYPE,
+    p_fecha_aprobado IN OUT prestamo.fecha_aprobado%TYPE,
+    p_monto_aprobado IN OUT prestamo.monto_aprobado%TYPE,
+    p_tasa_interes IN OUT prestamo.tasa_interes%TYPE,
+    p_letra_mensual IN OUT prestamo.letra_mensual%TYPE,
+    p_monto_pagado IN OUT prestamo.monto_pagado%TYPE,
+    p_fecha_pago IN OUT prestamo.fecha_pago%TYPE,
+    p_cod_sucursal IN OUT prestamo.cod_sucursal%TYPE,
+    p_saldoactual IN OUT prestamo.saldoactual%TYPE,
+    p_interespagado IN OUT prestamo.interespagado%TYPE,
+    p_fechamodificacion IN OUT prestamo.fechamodificacion%TYPE) AS
+
+BEGIN
+    INSERT INTO prestamo (clienteid, tipo_prestamoID, numero_prestamo, fecha_aprobado, monto_aprobado, tasa_interes, letra_mensual, monto_pagado, fecha_pago,cod_sucursal,saldoactual, interespagado, fechamodificacion, usuario)  values 
+    (p_clienteid,p_tipo_prestamo, p_numero_prestamo, p_fecha_aprobado, p_monto_aprobado, p_tasa_interes, p_letra_mensual, p_monto_pagado, p_fecha_pago,p_cod_sucursal,p_saldoactual, p_interespagado, p_fechamodificacion, user);
+
+    INSERT INTO Sucursal_tipo_prestamo(cod_sucursal, tipo_prestamoid, monto_prestamos, cantidad)
+    VALUES (p_cod_sucursal, p_tipo_prestamoid, 0, 0);
+
+
+UPDATE sucursal
+SET monto_prestamos = monto_prestamos + p_monto_aprobado;
+WHERE cod_sucursal = p_cod_sucursal;
+
+UPDATE sucursal
+SET cantidad_prestamo = p_cantidad_prestamo + 1
+WHERE cod_sucursal = p_cod_sucursal;
+
+UPDATE Sucursal_tipo_prestamo
+SET monto_Tipo_prestamos = monto_Tipo_prestamos + p_monto_aprobado;
+WHERE tipo_prestamoID = p_tipo_prestamoID
+
+UPDATE Sucursal_tipo_prestamo
+SET cantidad_prestamo = p_cantidad_prestamo + 1
+WHERE tipo_prestamoID = p_tipo_prestamoID;
+
+
+    
+END insersion_prestamo;
+
+Declare
+v_clienteid prestamo.clienteID%TYPE:=1;
+v_tipo_prestamo prestamo.tipo_prestamoid%TYPE:= 1;
+v_numero_prestamo  prestamo.numero_prestamo%TYPE:= 1;
+v_fecha_aprobado  prestamo.fecha_aprobado%TYPE:=TO_DATE('01/01/2022','DD/MM/YYYY');
+v_monto_aprobado  prestamo.monto_aprobado%TYPE:=21000;
+v_tasa_interes  prestamo.tasa_interes%TYPE:='5%';
+v_letra_mensual  prestamo.letra_mensual%TYPE:=1000;
+v_monto_pagado  prestamo.monto_pagado%TYPE:=7000;
+v_fecha_pago  prestamo.fecha_pago%TYPE:=TO_DATE('03/03/2022','DD/MM/YYYY');
+v_cod_sucursal prestamo.cod_sucursal%TYPE:=1;
+v_saldoactual prestamo.saldoactual%TYPE:=14000;
+v_interespagado  prestamo.interespagado%TYPE:= 350;
+v_fechamodificacion  prestamo.fechamodificacion%TYPE:=TO_DATE('03/03/2022','DD/MM/YYYY');
+
+
+Begin
+    insersion_prestamo(v_clienteid,v_tipo_prestamo,v_numero_prestamo,v_fecha_aprobado,v_monto_aprobado,v_tasa_interes,v_letra_mensual,v_monto_pagado,v_fecha_pago,v_cod_sucursal,v_saldoactual,v_interespagado,v_fechamodificacion);
+end;
+
+
+Declare
+v_clienteid prestamo.clienteID%TYPE:=2;
+v_tipo_prestamo prestamo.tipo_prestamoid%TYPE:=2;
+v_numero_prestamo  prestamo.numero_prestamo%TYPE:= 1;
+v_fecha_aprobado  prestamo.fecha_aprobado%TYPE:=TO_DATE('07/03/2021','DD/MM/YYYY');
+v_monto_aprobado  prestamo.monto_aprobado%TYPE:=30000;
+v_tasa_interes  prestamo.tasa_interes%TYPE:='10%';
+v_letra_mensual  prestamo.letra_mensual%TYPE:=2000;
+v_monto_pagado  prestamo.monto_pagado%TYPE:=5000;
+v_fecha_pago  prestamo.fecha_pago%TYPE:=TO_DATE('03/03/2022','DD/MM/YYYY');
+v_cod_sucursal prestamo.cod_sucursal%TYPE:=1;
+v_saldoactual prestamo.saldoactual%TYPE:=25000;
+v_interespagado  prestamo.interespagado%TYPE:= 350;
+v_fechamodificacion  prestamo.fechamodificacion%TYPE:=TO_DATE('03/07/2021','DD/MM/YYYY');
+
+
+Begin
+    insersion_prestamo(v_clienteid,v_tipo_prestamo,v_numero_prestamo,v_fecha_aprobado,v_monto_aprobado,v_tasa_interes,v_letra_mensual,v_monto_pagado,v_fecha_pago,v_cod_sucursal,v_saldoactual,v_interespagado,v_fechamodificacion);
+end;

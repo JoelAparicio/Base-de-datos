@@ -5,6 +5,18 @@ INSERT INTO tipo_telefono (telefonoID, descripcion)values
 (secuencia_telefono.nextval,p_descripcion);
 END tipo_telefonos;
 
+BEGIN 
+tipo_telefonos('Celular');
+END;
+BEGIN 
+tipo_telefonos('Residencial');
+END;
+BEGIN 
+tipo_telefonos('Celular de familiar cercano');
+END;
+BEGIN 
+tipo_telefonos('Celular de conyugue');
+END;
 
 CREATE OR REPLACE PROCEDURE tipo_correos(
 p_descripcion IN OUT tipo_correo.descripcion%TYPE) IS
@@ -12,6 +24,16 @@ BEGIN
 INSERT INTO tipo_correo(tipo_correoID, descripcion) values
 (secuencia_correo.nextval,p_descripcion);
 END tipo_correos;
+
+BEGIN 
+tipo_correos('Personal');
+END;
+BEGIN 
+tipo_correos('Laboral');
+END;
+BEGIN 
+tipo_correos('Academico');
+END;
 
 
 CREATE OR REPLACE PROCEDURE tipo_profesion(
@@ -21,6 +43,15 @@ INSERT INTO profesion(id_profesion,profesion) values
 (secuencia_profesion.nextval,p_profesion);
 END tipo_profesion;
 
+BEGIN 
+tipo_profesion('Camarero');
+END;
+BEGIN 
+tipo_profesion('Marinero');
+END;
+BEGIN 
+tipo_profesion('Cajero');
+END;
 
 CREATE OR REPLACE PROCEDURE tipo_sucursal(
 p_nombre_sucursal IN OUT sucursal.nombre_sucursal%TYPE) IS
@@ -29,6 +60,15 @@ INSERT INTO sucursal(cod_sucursal,nombre_sucursal,monto_prestamos,cantidad) valu
 (secuencia_sucursal.nextval,p_nombre_sucursal,0,0);
 END tipo_sucursal;
 
+BEGIN 
+tipo_sucursal('Dorado');
+END;
+BEGIN 
+tipo_sucursal('Altaplaza');
+END;
+BEGIN 
+tipo_sucursal('Albrook');
+END;
 
 CREATE OR REPLACE PROCEDURE tipo_prestamo(
 p_tipo_prestamo IN OUT tipo_de_prestamo.tipo_prestamo%TYPE) IS
@@ -36,6 +76,22 @@ BEGIN
 INSERT INTO tipo_de_prestamo(tipo_prestamoID,tipo_prestamo) values
 (secuencia_prestamo.nextval,p_tipo_prestamo);
 END tipo_prestamo;
+
+BEGIN 
+tipo_prestamo('Personal');
+END;
+BEGIN 
+tipo_prestamo('Automovil');
+END;
+BEGIN 
+tipo_prestamo('Hipotecario');
+END;
+BEGIN 
+tipo_prestamo('Dedicado para ahorros');
+END;
+
+
+
 
 
 DECLARE

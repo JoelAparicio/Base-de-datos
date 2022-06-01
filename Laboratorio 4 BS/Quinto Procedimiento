@@ -1,48 +1,65 @@
-CREATE OR REPLACE PROCEDURE actuapresta
-AS
-v_cliente transacpagos.id_cliente%TYPE;
-v_tipop transacpagos.tipoprestamo%TYPE;
-v_montopago transacpagos.monto_del_pago%TYPE;
-v_fecha transacpagos.fechainsercion%TYPE;
-CURSOR c_pago IS
-SELECT * FROM transacpagos;
-v_saldoprestamo prestamo.saldo_actual%TYPE;
-v_interes tipo_prestamo.tasa_interes%TYPE;
-v_interestotal tipo_prestamo.tasa_interes%TYPE;
-v_nuevo prestamo.saldo_actual%TYPE;
-v_montoacum prestamo.monto_pagado%TYPE;
-v_interacum prestamo.interes_pagado%TYPE;
+CREATE OR REPLACE PROCEDURE interes()
+    AS
+CURSOR c_searchpago IS
+SELECT clienteID, tipo_prestamoID, monto_del_pago
+FROM transacpagos
+WHERE Status = 'N';
+v_cliente           transacpagos.clienteID%TYPE;
+v_Tipo_Prestamo     transacpagos.tipo_prestamoID%TYPE;
+v_Montodepago       transacpagos.monto_del_pago%TYPE;
+v_Saldo_actual      prestamo.saldoactual%TYPE;
+v_Interes_pagado    prestamo.interespagado%TYPE;
+v_tasa              prestamo.tasa_interes%TYPE;
+v_montopagado       prestamo.monto_pagado%TYPE;
 BEGIN
-v_montoacum :=0;
-v_interacum :=0;
-FOR v_pagodato IN c_pago LOOP
-v_cliente:= v_pagodato.id_cliente;
-v_tipop := v_pagodato.tipoprestamo;
-v_montopago := v_pagodato.monto_del_pago;
-SELECT saldo_actual INTO v_saldoprestamo FROM prestamo --saldo del prestamo
-WHERE id_cliente=v_cliente AND tipo=v_tipop;
-SELECT tasa_interes INTO v_interes FROM tipo_prestamo ---interes fijo del tipo de prestamo
-WHERE tipo=v_tipop;
-v_interestotal:=tasainteres(v_saldoprestamo,v_interes); --calculo del interes del prestamo
-v_nuevo:=v_interestotal-v_montopago; --resta el pago del interes
-IF(v_nuevo<0) THEN --lo que sobra se le resta al salgdo actual
-v_nuevo:=(v_nuevo*-1);
-v_nuevo:=v_saldoprestamo-v_nuevo;
-UPDATE prestamo SET saldo_actual=v_nuevo WHERE id_cliente=v_cliente AND tipo=v_tipop;
-UPDATE prestamo SET fecha_pago=v_pagodato.fechatransaccion WHERE id_cliente=v_cliente AND tipo=v_tipop;
-UPDATE prestamo SET fecha_modificacion=sysdate WHERE id_cliente=v_cliente AND tipo=v_tipop;
-v_montoacum:=v_montoacum+v_montopago;
-v_interacum:=v_interacum+v_interestotal;
-UPDATE prestamo SET monto_pagado=v_montoacum WHERE id_cliente=v_cliente AND tipo=v_tipop;
-UPDATE prestamo SET interes_pagado=v_interacum WHERE id_cliente=v_cliente AND tipo=v_tipop;
-UPDATE prestamo SET usuario=v_pagodato.usuario WHERE id_cliente=v_cliente AND tipo=v_tipop;
-END IF;
-END LOOP;
-END actuapresta;
+	OPEN c_searchpago;
+	LOOP
+		FETCH c_searchpago INTO v_cliente, v_Tipo_Prestamo, v_Montodepago;
+		EXIT WHEN c_searchpago%NOTFOUND;
+        SELECT saldoactual, interespagado, tasa_interes, monto_pagado 
+        INTO v_Saldo_actual, v_Interes_pagado, v_tasa, v_montopagado
+        FROM prestamo
+        WHERE clienteID = v_cliente AND tipo_prestamoID = V_Tipo_Prestamo;
+        UPDATE prestamo
+        SET saldo_actual=calculo_saldoactual(v_Saldo_actual, v_montodepago, v_tasa), 
+        Interes_pagado= calculo_interes(v_Saldo_actual,v_tasa), 
+        Monto_Pagado= calculo_montopagado(v_montopagado, v_montodepago, v_saldo_actual, v_tasa)
+        WHERE clienteID = v_cliente AND tipo_prestamoID = p_tipo_prestamo;
+    END LOOP;
+    CLOSE c_findpago;
+
+END actpago;
 /
-SELECT * FROM prestamo;
+
+--Funcion que calcula el interes
+CREATE OR REPLACE FUNCTION calculo_interes(
+    p_saldo_actual IN prestamo.saldo_actual%TYPE,
+    p_tasa IN prestamo.tasa_interes%TYPE)
+    RETURN prestamo.interes_pagado%TYPE IS 
 BEGIN
-actuapresta();
-END;
-/
-SELECT * FROM prestamo;
+    RETURN p_Saldo_actual*p_tasa;
+END calculo_interes;
+
+--Funcion que calcula el saldo actual
+CREATE OR REPLACE FUNCTION calculo_saldoactual(
+    p_saldo_actual IN prestamo.saldoactual%TYPE,
+    p_montodepago IN transacpagos.monto_del_pago%TYPE,
+    p_tasa IN prestamo.tasa_interes%TYPE)
+    RETURN prestamo.saldoactual%TYPE IS 
+BEGIN
+    RETURN p_Saldo_actual-(p_montodepago-(p_saldo_actual*p_tasa));
+END calculo_saldoactual;
+
+--Funcion que calcula el monto pagado
+CREATE OR REPLACE FUNCTION calculo_montopagado(
+    p_montopagado IN prestamo.monto_pagado%TYPE,
+    p_montodepago IN transacpagos.monto_del_pago%TYPE,
+    p_saldo_actual IN prestamo.saldoactual%TYPE,
+    p_tasa IN prestamo.tasa_interes%TYPE)
+    RETURN prestamo.saldoactual%TYPE IS 
+BEGIN
+    RETURN p_montopagado + (p_montodepago-(p_saldo_actual*p_tasa));
+END calculo_montopagado;
+
+
+

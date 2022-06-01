@@ -25,5 +25,5 @@ END;
 
 
 BEGIN
-Nueva_Trans_Pago (3, 3, 3, 2, TO_DATE('19/11/2020','DD/MM/YYYY'), 100.00, TO_DATE('17/11/2020','DD/MM/YYYY'), 'Gabi');
+insertar_transaccion (3, 3, 3, 2, TO_DATE('19/11/2020','DD/MM/YYYY'), 100.00, TO_DATE('17/11/2020','DD/MM/YYYY'), 'N');
 END;
