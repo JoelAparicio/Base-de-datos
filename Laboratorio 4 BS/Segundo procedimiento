@@ -9,13 +9,13 @@ RETURN v_edad;
 END calcular_edad;
 
 CREATE OR REPLACE PROCEDURE insertar_cliente(
-p_cedula IN OUT cliente.cedula%TYPE,
-p_nombre IN OUT cliente.nombre%TYPE,
-p_apellido IN OUT cliente.apellido%TYPE,
-p_sexo IN OUT cliente.sexo%TYPE,
-p_profesion IN OUT cliente.id_profesion%TYPE,
-p_fechanacimiento IN OUT cliente.fecha_nacimiento%TYPE,
-p_sucursal IN OUT cliente.cod_sucursal%TYPE) IS 
+p_cedula IN cliente.cedula%TYPE,
+p_nombre IN cliente.nombre%TYPE,
+p_apellido IN cliente.apellido%TYPE,
+p_sexo IN cliente.sexo%TYPE,
+p_profesion IN cliente.id_profesion%TYPE,
+p_fechanacimiento IN cliente.fecha_nacimiento%TYPE,
+p_sucursal IN cliente.cod_sucursal%TYPE) IS 
 BEGIN
 INSERT INTO cliente (clienteID, cedula, nombre, apellido, sexo, id_profesion, fecha_nacimiento, cod_sucursal, edad) values
 (SECUENCIA_CLIENTE.nextval,p_cedula,p_nombre,p_apellido,p_sexo,p_profesion,p_fechanacimiento,p_sucursal, calcular_edad(p_fechanacimiento));

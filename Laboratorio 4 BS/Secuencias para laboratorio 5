@@ -41,3 +41,16 @@ drop sequence secuencia_profesion;
 drop sequence secuencia_correo;
 drop sequence secuencia_telefono;
 drop sequence secuencia_transaccion;
+
+
+delete from transacpagos;
+delete from tipo_telefono;
+delete from tipo_de_prestamo;
+delete from tipo_correo;
+delete from sucursal;
+delete from telefono;
+delete from sucursal_tipo_prestamo;
+delete from profesion;
+delete from prestamo;
+delete from correo;
+delete from cliente;

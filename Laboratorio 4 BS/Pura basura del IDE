@@ -165,3 +165,6 @@ drop sequence secuencia_profesion;
 drop sequence secuencia_sucursal;
 drop sequence secuencia_prestamo;
 drop sequence secuencia_cliente;
+
+alter table prestamo
+ modify fecha_pago null;
