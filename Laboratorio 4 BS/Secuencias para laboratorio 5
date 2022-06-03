@@ -34,6 +34,7 @@ CREATE SEQUENCE secuencia_transaccion
     INCREMENT BY 1
     NOCACHE;
 
+
 drop sequence secuencia_cliente;
 drop sequence secuencia_prestamo;
 drop sequence secuencia_sucursal;
@@ -41,6 +42,7 @@ drop sequence secuencia_profesion;
 drop sequence secuencia_correo;
 drop sequence secuencia_telefono;
 drop sequence secuencia_transaccion;
+
 
 
 delete from transacpagos;
@@ -54,3 +56,6 @@ delete from profesion;
 delete from prestamo;
 delete from correo;
 delete from cliente;
+
+alter table prestamo
+ modify fecha_pago null;
