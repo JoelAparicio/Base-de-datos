@@ -1,170 +1,47 @@
-CREATE OR REPLACE PROCEDURE insertar_prestamos_aprobado(
-p_clienteid IN OUT prestamo.clienteID%TYPE,
-p_tipo_prestamo IN OUT prestamo.tipo_prestamoid%TYPE,
-p_numero_prestamo IN OUT prestamo.numero_prestamo%TYPE,
-p_fecha_aprobado IN OUT prestamo.fecha_aprobado%TYPE,
-p_monto_aprobado IN OUT prestamo.monto_aprobado%TYPE,
-p_tasa_interes IN OUT prestamo.tasa_interes%TYPE,
-p_letra_mensual IN OUT prestamo.letra_mensual%TYPE,
-p_monto_pagado IN OUT prestamo.monto_pagado%TYPE,
-p_fecha_pago IN OUT prestamo.fecha_pago%TYPE,
-p_cod_sucursal IN OUT prestamo.cod_sucursal%TYPE,
-p_saldoactual IN OUT prestamo.saldoactual%TYPE,
-p_interespagado IN OUT prestamo.interespagado%TYPE,
-p_fechamodificacion IN OUT prestamo.fechamodificacion%TYPE
-) IS 
-
+CREATE OR REPLACE PROCEDURE "actualizacion_pago"
+IS
+v_cliente           transacpagos.clienteID%TYPE;
+v_Tipo_Prestamo     transacpagos.tipo_prestamoID%TYPE;
+v_Montodepago       transacpagos.monto_del_pago%TYPE;
+v_Saldo_actual      prestamo.saldoactual%TYPE;
+v_Interes_pagado    prestamo.interespagado%TYPE;
+v_tasa              prestamo.tasa_interes%TYPE;
+v_montopagado       prestamo.monto_pagado%TYPE;
+v_transaccion       transacpagos.fecha_transaccion%TYPE;
+v_insercion         transacpagos.fecha_insercion%TYPE;
+CURSOR c_searchpago IS
+SELECT clienteID, tipo_prestamoID, monto_del_pago,fecha_transaccion,fecha_insercion
+FROM transacpagos
+WHERE Status = 'N';
 BEGIN
+    OPEN c_searchpago;
+    LOOP
+        FETCH c_searchpago INTO v_cliente, v_Tipo_Prestamo, v_Montodepago,v_transaccion,v_insercion;
+        SELECT saldoactual, tasa_interes, saldoactual 
+        INTO v_Saldo_actual, v_tasa, v_Saldo_actual
+        FROM prestamo
+        WHERE clienteID = v_cliente AND tipo_prestamoID = V_Tipo_Prestamo;
+        v_Interes_pagado:=calculo_interes(v_saldo_actual, v_tasa);
+        IF v_Montodepago <= v_Interes_pagado THEN
+        UPDATE prestamo
+        SET interespagado = v_Montodepago,
+            fecha_pago = v_transaccion,
+            fechamodificacion=v_insercion,
+            monto_pagado = v_Montodepago
+        WHERE clienteID = v_cliente AND tipo_prestamoID = v_Tipo_Prestamo;
+        ELSE
+            UPDATE prestamo
+            SET saldoactual = saldoactual - (v_Montodepago-v_Interes_pagado),
+                interespagado = v_Interes_pagado,
+                fecha_pago = v_transaccion,
+                fechamodificacion=v_insercion,
+                monto_pagado = v_Montodepago
+            WHERE clienteID = v_cliente AND tipo_prestamoID = v_Tipo_Prestamo;
+        END IF;
+        EXIT WHEN c_searchpago%NOTFOUND;
+        
+        
+    END LOOP;
+    CLOSE c_searchpago;
 
-INSERT INTO prestamo (clienteid, tipo_prestamoID, numero_prestamo, fecha_aprobado, monto_aprobado, tasa_interes, letra_mensual, monto_pagado, fecha_pago,cod_sucursal,saldoactual, interespagado, fechamodificacion, usuario)  values 
-(p_clienteid,p_tipo_prestamo, p_numero_prestamo, p_fecha_aprobado, p_monto_aprobado, p_tasa_interes, p_letra_mensual, p_monto_pagado, p_fecha_pago,p_cod_sucursal,p_saldoactual, p_interespagado, p_fechamodificacion, user);
-
-INSERT INTO sucursal_tipo_prestamo (cod_sucursal,tipo_prestamoID,monto_prestamos,cantidad)
-Values (p_cod_sucursal,p_tipo_prestamo,0,0);
-
-UPDATE sucursal
-SET monto_prestamos = monto_prestamos + p_monto_aprobado
-WHERE cod_sucursal = cod_sucursal;
-
-UPDATE sucursal
-SET cantidad = cantidad + 1
-WHERE cod_sucursal = cod_sucursal;
-
-
-IF p_tipo_prestamo = 1 AND p_cod_sucursal = p_cod_sucursal then
-    UPDATE sucursal_tipo_prestamo
-    SET monto_prestamos= monto_prestamos + p_monto_aprobado, 
-        cantidad = cantidad + 1
-    WHERE tipo_prestamoID = 1;
-
-ELSIF p_tipo_prestamo = 2 AND p_cod_sucursal = p_cod_sucursal   then
-    UPDATE sucursal_tipo_prestamo
-    SET monto_prestamos= monto_prestamos + p_monto_aprobado, 
-        cantidad = cantidad + 1
-    WHERE tipo_prestamoID = 2;
-
-ELSIF p_tipo_prestamo = 3 AND p_cod_sucursal = p_cod_sucursal  then
-    UPDATE sucursal_tipo_prestamo
-    SET monto_prestamos= monto_prestamos + p_monto_aprobado, 
-        cantidad = cantidad + 1
-    WHERE tipo_prestamoID = 3;
-    
-ELSE 
-    UPDATE sucursal_tipo_prestamo
-    SET monto_prestamos= monto_prestamos + p_monto_aprobado, 
-        cantidad = cantidad + 1
-    WHERE tipo_prestamoID = 4;
-
-END IF;
-    
-END insertar_prestamos_aprobado;
-
-drop procedure insertar_prestamos_aprobado;
-
-Declare
-v_clienteid prestamo.clienteID%TYPE:=1;
-v_tipo_prestamo prestamo.tipo_prestamoid%TYPE:=1;
-v_numero_prestamo  prestamo.numero_prestamo%TYPE:= 4;
-v_fecha_aprobado  prestamo.fecha_aprobado%TYPE:=TO_DATE('02/01/2021','DD/MM/YYYY');
-v_monto_aprobado  prestamo.monto_aprobado%TYPE:=23000;
-v_tasa_interes  prestamo.tasa_interes%TYPE:='5%';
-v_letra_mensual  prestamo.letra_mensual%TYPE:=1000;
-v_monto_pagado  prestamo.monto_pagado%TYPE:=7000;
-v_fecha_pago  prestamo.fecha_pago%TYPE:=TO_DATE('01/03/2022','DD/MM/YYYY');
-v_cod_sucursal prestamo.cod_sucursal%TYPE:=1;
-v_saldoactual prestamo.saldoactual%TYPE:=15000;
-v_interespagado  prestamo.interespagado%TYPE:= 350;
-v_fechamodificacion  prestamo.fechamodificacion%TYPE:=TO_DATE('03/03/2018','DD/MM/YYYY');
-
-Begin
-    insertar_prestamos_aprobado(v_clienteid,v_tipo_prestamo,v_numero_prestamo,v_fecha_aprobado,v_monto_aprobado,v_tasa_interes,v_letra_mensual,v_monto_pagado,v_fecha_pago,v_cod_sucursal,v_saldoactual,v_interespagado,v_fechamodificacion);
-end;
-
-
-
-ALTER SESSION SET nls_date_format='DD/MM/YYYY'; 
-
-CREATE OR REPLACE FUNCTION calcular_edad(p_calculo_edad IN cliente.fecha_nacimiento%TYPE) 
-RETURN NUMBER
-AS
-v_edad NUMBER;
-BEGIN
-SELECT FLOOR(months_between(sysdate,p_calculo_edad)/12) INTO v_edad FROM dual;
-RETURN v_edad;
-END calcular_edad;
-
-CREATE OR REPLACE PROCEDURE insertar_cliente(
-p_cedula IN OUT cliente.cedula%TYPE,
-p_nombre IN OUT cliente.nombre%TYPE,
-p_apellido IN OUT cliente.apellido%TYPE,
-p_sexo IN OUT cliente.sexo%TYPE,
-p_profesion IN OUT cliente.id_profesion%TYPE,
-p_fechanacimiento IN OUT cliente.fecha_nacimiento%TYPE,
-p_sucursal IN OUT cliente.cod_sucursal%TYPE) IS 
-BEGIN
-INSERT INTO cliente (clienteID, cedula, nombre, apellido, sexo, id_profesion, fecha_nacimiento, cod_sucursal, edad) values
-(SECUENCIA_CLIENTE.nextval,p_cedula,p_nombre,p_apellido,p_sexo,p_profesion,p_fechanacimiento,p_sucursal, calcular_edad(p_fechanacimiento) );
-end insertar_cliente;
-
-Declare
-v_cedula  cliente.cedula%TYPE:='8-9823-2332';
-v_nombre  cliente.nombre%TYPE:='gaby';
-v_apellido  cliente.apellido%TYPE:='apariciasdo';
-v_sexo  cliente.sexo%TYPE:='F';
-v_profesion cliente.id_profesion%TYPE:=1;
-v_fechanacimiento  cliente.fecha_nacimiento%TYPE:=TO_DATE('01/12/1994','DD/MM/YYYY');
-v_sucursal cliente.cod_sucursal%TYPE:=1;
-
-Begin
-    insertar_cliente(v_cedula,v_nombre,v_apellido,v_sexo,v_profesion,v_fechanacimiento,v_sucursal);
-end;
-
-
-select * from sucursal_tipo_prestamo;
-insert into sucursal 
-values (2,'henryteodio',0,0);
-
-drop procedure insertar_cliente;
-
-drop function calcular_edad;
-
-delete from prestamo;
-
-
-
-
-
-
-
-
-
-
-
-CREATE SEQUENCE secuencia_cliente
-    MINVALUE 1
-    START WITH 2
-    INCREMENT BY 1
-    NOCACHE;
-CREATE SEQUENCE secuencia_prestamo
-    MINVALUE 1
-    START WITH 1
-    INCREMENT BY 1
-    NOCACHE;
-CREATE SEQUENCE secuencia_sucursal
-    MINVALUE 1
-    START WITH 2
-    INCREMENT BY 1
-    NOCACHE;
-CREATE SEQUENCE secuencia_profesion
-    MINVALUE 1
-    START WITH 2
-    INCREMENT BY 1
-    NOCACHE;
-
-drop sequence secuencia_profesion;
-drop sequence secuencia_sucursal;
-drop sequence secuencia_prestamo;
-drop sequence secuencia_cliente;
-
-alter table prestamo
- modify fecha_pago null;
+END;

@@ -1,4 +1,4 @@
-ALTER SESSION SET nls_date_format='DD/MM/YYYY'; *COMANDO VITAL PARA FORMATO DE FECHA*
+ALTER SESSION SET nls_date_format='DD/MM/YYYY'; 
 CREATE OR REPLACE FUNCTION calcular_edad(p_calculo_edad IN cliente.fecha_nacimiento%TYPE) 
 RETURN NUMBER
 AS
