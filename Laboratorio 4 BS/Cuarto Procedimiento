@@ -1,23 +1,25 @@
 alter session set nls_date_format = 'dd/MON/yyyy hh24:mi:ss'
+
 CREATE OR REPLACE PROCEDURE insertar_transaccion (
     p_cod_sucursal      IN  transacpagos.cod_sucursal%TYPE,
     p_id_cliente        IN  transacpagos.clienteid%TYPE,
     p_tipo_prestamo     IN  transacpagos.tipo_prestamoid%TYPE,
     p_fecha_transaccion IN  transacpagos.fecha_transaccion%TYPE,
-    p_monto_del_pago    IN  transacpagos.monto_del_pago%TYPE,
-    p_fecha_insercion   IN  transacpagos.fecha_insercion%TYPE,
-    p_status            IN  transacpagos.status%TYPE) IS  
+    p_monto_del_pago    IN  transacpagos.monto_del_pago%TYPE) IS  
 BEGIN
-INSERT INTO transacpagos (id_transaccion,cod_sucursal, clienteid, tipo_prestamoid, fecha_transaccion, monto_del_pago, fecha_insercion, usuario,status)
-VALUES (secuencia_transaccion.nextval, p_cod_sucursal, p_id_cliente, p_tipo_prestamo, p_fecha_transaccion, p_monto_del_pago, p_fecha_insercion, user,p_status);
+INSERT INTO transacpagos (id_transaccion,cod_sucursal, clienteid, tipo_prestamoid, fecha_transaccion, monto_del_pago, fecha_insercion, usuario, status)
+VALUES (secuencia_transaccion.nextval, p_cod_sucursal, p_id_cliente, p_tipo_prestamo, p_fecha_transaccion, p_monto_del_pago,sysdate, user,'N');
 END insertar_transaccion;
-
-BEGIN
-insertar_transaccion (1,1,1,TO_DATE('07/04/2021','DD/MM/YYYY'),2000,TO_DATE('07/04/2021 10:37:23','DD/MM/YY HH24:MI:SS'),'N'); 
-END;
+/
 BEGIN
 insertar_transaccion (2,2,3,TO_DATE('08/04/2021','DD/MM/YYYY'),2500,TO_DATE('08/04/2021 12:29:53','DD/MM/YY HH24:MI:SS'),'N'); 
 END;
+/
 BEGIN
 insertar_transaccion (1,3,1,TO_DATE('09/04/2021','DD/MM/YYYY'),1000,TO_DATE('09/04/2021 01:03:29','DD/MM/YY HH24:MI:SS'),'N'); 
 END;
+/
+BEGIN
+insertar_transaccion (1,1,1,TO_DATE('07/04/2021','DD/MM/YYYY'),2000,TO_DATE('07/04/2021 10:37:23','DD/MM/YY HH24:MI:SS')); 
+END;
+/

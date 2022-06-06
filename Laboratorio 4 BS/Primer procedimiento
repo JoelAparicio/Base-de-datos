@@ -1,22 +1,27 @@
+ALTER SESSION SET nls_date_format='DD-MM-YYYY HH24:MI:SS';
 CREATE OR REPLACE PROCEDURE tipo_telefonos(
 p_descripcion IN Tipo_telefono.Descripcion%TYPE) IS
 BEGIN
 INSERT INTO tipo_telefono (telefonoID, descripcion)values
 (secuencia_telefono.nextval,p_descripcion);
 END tipo_telefonos;
-
+/
 BEGIN 
 tipo_telefonos('Celular');
 END;
+/
 BEGIN 
 tipo_telefonos('Residencial');
 END;
+/
 BEGIN 
 tipo_telefonos('Celular de familiar cercano');
 END;
+/
 BEGIN 
 tipo_telefonos('Celular de conyugue');
 END;
+/
 
 CREATE OR REPLACE PROCEDURE tipo_correos(
 p_descripcion IN  tipo_correo.descripcion%TYPE) IS
@@ -24,16 +29,19 @@ BEGIN
 INSERT INTO tipo_correo(tipo_correoID, descripcion) values
 (secuencia_correo.nextval,p_descripcion);
 END tipo_correos;
-
+/
 BEGIN 
 tipo_correos('Personal');
 END;
+/
 BEGIN 
 tipo_correos('Laboral');
 END;
+/
 BEGIN 
 tipo_correos('Academico');
 END;
+/
 
 
 CREATE OR REPLACE PROCEDURE tipo_profesion(
@@ -42,19 +50,23 @@ BEGIN
 INSERT INTO profesion(id_profesion,profesion) values
 (secuencia_profesion.nextval,p_profesion);
 END tipo_profesion;
-
+/
 BEGIN 
 tipo_profesion('Camarero');
 END;
+/
 BEGIN 
 tipo_profesion('Marinero');
 END;
+/
 BEGIN 
 tipo_profesion('Cajero');
 END;
+/
 BEGIN 
 tipo_profesion('Ingeniero');
 END;
+/
 
 CREATE OR REPLACE PROCEDURE tipo_sucursal(
 p_nombre_sucursal IN  sucursal.nombre_sucursal%TYPE) IS
@@ -62,16 +74,19 @@ BEGIN
 INSERT INTO sucursal(cod_sucursal,nombre_sucursal,monto_prestamos,cantidad) values
 (secuencia_sucursal.nextval,p_nombre_sucursal,0,0);
 END tipo_sucursal;
-
+/
 BEGIN 
 tipo_sucursal('Dorado');
 END;
+/
 BEGIN 
 tipo_sucursal('Altaplaza');
 END;
+/
 BEGIN 
 tipo_sucursal('Albrook');
 END;
+/
 
 CREATE OR REPLACE PROCEDURE tipo_prestamo(
 p_tipo_prestamo IN  tipo_de_prestamo.tipo_prestamo%TYPE) IS
@@ -79,18 +94,102 @@ BEGIN
 INSERT INTO tipo_de_prestamo(tipo_prestamoID,tipo_prestamo) values
 (secuencia_prestamo.nextval,p_tipo_prestamo);
 END tipo_prestamo;
-
+/
 BEGIN 
 tipo_prestamo('Personal');
 END;
+/
 BEGIN 
 tipo_prestamo('Automovil');
 END;
+/
 BEGIN 
 tipo_prestamo('Hipotecario');
 END;
+/
 BEGIN 
 tipo_prestamo('Dedicado para ahorros');
 END;
+/
+
+CREATE OR REPLACE PROCEDURE insertar_correo(
+    p_id_cliente IN correo.clienteid%TYPE,
+    p_cod_email IN correo.tipo_correoid%TYPE,
+    p_email IN  correo.correo%TYPE) IS
+BEGIN 
+    INSERT INTO correo 
+    VALUES(p_id_cliente, p_cod_email, p_email);
+END insertar_correo;
 
 
+BEGIN 
+insertar_correo(1, 1, 'emily.fong@gmail.com');
+END;
+/
+BEGIN 
+insertar_correo(1, 3, 'carlos.restrepo@gmail.com');
+END;
+/
+BEGIN 
+insertar_correo(3, 1, 'ariel.gutierrez@gmail.com');
+END;
+/
+BEGIN 
+insertar_correo(3, 3, 'cesar.rodriguez@gmail.com');
+END;
+/
+BEGIN 
+insertar_correo(2, 1, 'cecydi.bethancourt@gmail.com');
+END;
+/
+BEGIN 
+insertar_correo(2, 3, 'agustin2649@gmail.com');
+END;
+/
+BEGIN 
+insertar_correo(4, 1, 'estefanyH284@gmail.com');
+END;
+/
+BEGIN 
+insertar_correo(4, 3, 'henryquintana@gmail.com');
+END;
+/
+
+
+CREATE OR REPLACE PROCEDURE insertar_telefono(
+    p_id_cliente IN Telefono.clienteid%TYPE,
+    p_Cod_tel IN Telefono.telefonoid%TYPE,
+    p_telefono IN  Telefono.Telefono%TYPE) IS
+BEGIN 
+    INSERT INTO Telefono 
+    VALUES(p_id_cliente, p_Cod_tel, p_telefono);
+END insertar_telefono;
+/
+BEGIN 
+insertar_telefono(1, 1, '(+507) 7463-4583');
+END;
+/
+BEGIN 
+insertar_telefono(3, 1, '(+507) 6027-1276');
+END;
+/
+BEGIN 
+insertar_telefono(3, 2, '(+507) 620-7932');
+END;
+/
+BEGIN 
+insertar_telefono(2, 1, '(+507) 6017-7294');
+END;
+/
+BEGIN 
+insertar_telefono(2, 4, '(+507) 6183-7924');
+END;
+/
+BEGIN 
+insertar_telefono(4, 2, '(+507) 604-8720');
+END;
+/
+BEGIN 
+insertar_telefono(4, 3, '(+507) 6123-8402');
+END;
+/

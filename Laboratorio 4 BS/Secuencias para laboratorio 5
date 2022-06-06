@@ -1,38 +1,25 @@
 CREATE SEQUENCE secuencia_cliente
-    MINVALUE 1
     START WITH 1
-    INCREMENT BY 1
-    NOCACHE;
+    INCREMENT BY 1;
 CREATE SEQUENCE secuencia_prestamo
-    MINVALUE 1
     START WITH 1
-    INCREMENT BY 1
-    NOCACHE;
+    INCREMENT BY 1;
 CREATE SEQUENCE secuencia_sucursal
-    MINVALUE 1
-    START WITH 1
-    INCREMENT BY 1
-    NOCACHE;
+   START WITH 1
+    INCREMENT BY 1;
 CREATE SEQUENCE secuencia_profesion
-    MINVALUE 1
     START WITH 1
-    INCREMENT BY 1
-    NOCACHE;
+    INCREMENT BY 1;
 CREATE SEQUENCE secuencia_correo
-    MINVALUE 1
     START WITH 1
-    INCREMENT BY 1
-    NOCACHE;
+    INCREMENT BY 1;
 CREATE SEQUENCE secuencia_telefono
-    MINVALUE 1
     START WITH 1
-    INCREMENT BY 1
-    NOCACHE;
+    INCREMENT BY 1;
 CREATE SEQUENCE secuencia_transaccion
-    MINVALUE 1
     START WITH 1
-    INCREMENT BY 1
-    NOCACHE;
+    INCREMENT BY 1;
+ /   
 
 
 drop sequence secuencia_cliente;
@@ -43,7 +30,7 @@ drop sequence secuencia_correo;
 drop sequence secuencia_telefono;
 drop sequence secuencia_transaccion;
 
-
+drop table 
 
 delete from transacpagos;
 delete from tipo_telefono;

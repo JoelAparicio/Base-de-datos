@@ -31,10 +31,16 @@ UPDATE Sucursal_tipo_prestamo
 SET cantidad = cantidad + 1
 WHERE tipo_prestamoID = p_tipo_prestamo;
 END insersion_prestamo;
-
+/
 Begin
-    insersion_prestamo(3,1,TO_DATE('09/03/2021','DD/MM/YYYY'),30000,20,1000,1);
+    insersion_prestamo(3,1,TO_DATE('09/03/2021 19:23:12','DD/MM/YYYY HH24:MI:SS'),10000,0.05,500,1);
 end;
+/
 Begin
-    insersion_prestamo(2,2,TO_DATE('07/03/2021','DD/MM/YYYY'),30000,10,2000,1);
+    insersion_prestamo(2,2,TO_DATE('07/03/2021 23:49:13','DD/MM/YYYY HH24:MI:SS'),30000,0.03,2000,1);
 end;
+/
+Begin
+    insersion_prestamo(1,1,TO_DATE('08/03/2021 01:53:08','DD/MM/YYYY HH24:MI:SS'),15000,0.11,1500,2);
+end;
+/

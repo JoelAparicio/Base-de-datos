@@ -3,71 +3,99 @@ CREATE OR REPLACE FUNCTION calculo_interes(
     p_tasa IN prestamo.tasa_interes%TYPE)
     RETURN prestamo.interespagado%TYPE IS 
 BEGIN
-    RETURN (p_Saldo_actual*p_tasa)/100;
+    RETURN p_Saldo_actual*p_tasa;
 END calculo_interes;
 
-CREATE OR REPLACE PROCEDURE actualizacion_pago
-IS
-v_cliente           transacpagos.clienteID%TYPE;
-v_Tipo_Prestamo     transacpagos.tipo_prestamoID%TYPE;
+
+CREATE OR REPLACE PROCEDURE actualizacion_pago AS
+v_cod_sucursal      transacpagos.cod_sucursal%TYPE;
+v_cliente           transacpagos.clienteid%TYPE;
+v_Tipo_Prestamo     transacpagos.tipo_prestamoid%TYPE;
 v_Montodepago       transacpagos.monto_del_pago%TYPE;
-v_Saldo_actual      prestamo.saldoactual%TYPE;
-v_Interes_pagado    prestamo.interespagado%TYPE;
-v_tasa              prestamo.tasa_interes%TYPE;
-v_montopagado       prestamo.monto_pagado%TYPE;
-v_transaccion       transacpagos.fecha_transaccion%TYPE;
-v_insercion         transacpagos.fecha_insercion%TYPE;
-v_sucursal          prestamo.cod_sucursal%TYPE;
-CURSOR c_searchpago IS
-SELECT clienteID, tipo_prestamoID, monto_del_pago,fecha_transaccion,fecha_insercion
-FROM transacpagos
-WHERE Status = 'N';
-BEGIN
-    OPEN c_searchpago;
-    LOOP
-       FETCH c_searchpago INTO v_cliente, v_Tipo_Prestamo, v_Montodepago,v_transaccion,v_insercion;
-        SELECT saldoactual, tasa_interes, saldoactual,cod_sucursal
-        INTO v_Saldo_actual, v_tasa, v_Saldo_actual, v_sucursal
-        FROM prestamo
-        WHERE clienteID = v_cliente AND tipo_prestamoID = V_Tipo_Prestamo;
-        v_Interes_pagado:=calculo_interes(v_saldo_actual, v_tasa);
-            
-        IF v_Montodepago <= v_Interes_pagado THEN
-        UPDATE prestamo
-        SET interespagado = v_Montodepago,
-            fecha_pago = v_transaccion,
-            fechamodificacion=v_insercion,
-            monto_pagado = v_Montodepago
-        WHERE clienteID = v_cliente AND tipo_prestamoID = v_Tipo_Prestamo;
-        ELSE
-            UPDATE prestamo
-            SET saldoactual = saldoactual - (v_Montodepago-v_Interes_pagado),
-                interespagado = v_Interes_pagado,
-                fecha_pago = v_transaccion,
-                fechamodificacion=v_insercion,
-                monto_pagado = v_Montodepago
-            WHERE clienteID = v_cliente AND tipo_prestamoID = v_Tipo_Prestamo;
-            
-            UPDATE sucursal
-            SET monto_prestamos = monto_prestamos - (v_Interes_pagado * cantidad)
-            WHERE cod_sucursal = v_sucursal;
-            
-            UPDATE Sucursal_tipo_prestamo
-            SET monto_prestamos = monto_prestamos - (v_Interes_pagado * cantidad)
-            WHERE tipo_prestamoID = v_Tipo_Prestamo;
-        END IF;
-        EXIT WHEN c_searchpago%NOTFOUND;
-      
-    END LOOP;
-    CLOSE c_searchpago;
-    
-UPDATE transacpagos
-SET status = 'S';
-END actualizacion_pago; 
+v_id_transaccion    transacpagos.id_transaccion%TYPE;
+v_fechatransaccion  transacpagos.fecha_transaccion%TYPE;
+v_Saldo_actual      Prestamo.Saldoactual%TYPE;
+v_tasa              Prestamo.Tasa_interes%TYPE;
+v_interespagado     prestamo.interespagado%TYPE;
+v_interes           Prestamo.interespagado%TYPE;
+V_sobrante number;
+
+CURSOR c_actualizar_pagos IS
+SELECT cod_sucursal, clienteID, tipo_prestamoid, Monto_del_pago, Id_Transaccion, Fecha_transaccion
+FROM Transacpagos
+WHERE STATUS = 'N';
 
 BEGIN
-    actualizacion_pago;
+    OPEN c_actualizar_pagos;
+    LOOP
+        FETCH c_actualizar_pagos INTO v_cod_sucursal, v_cliente, v_Tipo_Prestamo, v_Montodepago, v_id_transaccion, v_fechatransaccion;
+        EXIT WHEN c_actualizar_pagos%NOTFOUND;
+
+        SELECT Saldoactual,tasa_interes, interespagado
+        INTO v_Saldo_actual, v_tasa, v_interespagado
+        FROM PRESTAMO
+        WHERE clienteID = v_cliente AND tipo_prestamoid = V_Tipo_Prestamo;
+        v_interes:=calculo_interes(v_Saldo_actual,v_tasa);
+
+        IF v_interes> v_interespagado THEN
+            V_sobrante:= v_Montodepago-(v_interes-v_interespagado);
+            IF V_sobrante>=0 THEN
+                UPDATE Prestamo
+                SET 
+                interespagado=interespagado+(v_Montodepago-V_sobrante),
+                saldoactual=saldoactual-V_sobrante, 
+                Monto_Pagado= monto_pagado + V_sobrante,
+                Fechamodificacion = sysdate,
+                Fecha_pago = v_fechatransaccion
+                WHERE clienteID = v_cliente AND tipo_prestamoid=v_Tipo_Prestamo;
+
+                UPDATE Sucursal 
+                SET Monto_prestamos=monto_prestamos-V_sobrante
+                WHERE Cod_sucursal = v_Cod_sucursal;
+
+                UPDATE Sucursal_Tipo_prestamo 
+                SET Monto_prestamos=monto_prestamos-V_sobrante
+                WHERE Cod_sucursal = v_Cod_sucursal AND tipo_prestamoid = V_Tipo_Prestamo;
+            ELSE
+                UPDATE Prestamo
+                SET 
+                Interespagado=interespagado+v_Montodepago,
+                Fechamodificacion = sysdate,
+                Fecha_pago = v_fechatransaccion
+                WHERE clienteID = v_cliente AND tipo_prestamoid=v_Tipo_Prestamo; 
+            END IF;
+
+        ELSE
+            UPDATE Prestamo
+            SET 
+            saldoactual=saldoactual-v_Montodepago, 
+            Monto_Pagado= monto_pagado + v_Montodepago,
+            Fechamodificacion = sysdate,
+            Fecha_pago = v_fechatransaccion
+            WHERE clienteID = v_cliente AND tipo_prestamoid=v_Tipo_Prestamo;
+
+            UPDATE Sucursal 
+            SET Monto_prestamos=monto_prestamos-v_Montodepago
+            WHERE Cod_sucursal = v_Cod_sucursal;
+
+            UPDATE sucursal_tipo_prestamo 
+            SET Monto_prestamos=monto_prestamos-v_Montodepago
+            WHERE Cod_sucursal = v_Cod_sucursal AND tipo_prestamoid = V_Tipo_Prestamo;
+    END IF;
+    UPDATE transacpagos
+    SET Status='S'
+    WHERE Id_Transaccion=v_id_transaccion;
+
+    END LOOP;
+    CLOSE c_actualizar_pagos;
+
+END actualizacion_pago;
+
+
+BEGIN
+actualizacion_pago;
 END;
+
 
 
 

@@ -1,16 +1,14 @@
-Cambios del laboratorio 5:
-Parte de aire 1
 ALTER TABLE cliente 
     ADD edad number(3) not null;
+/
 
-Parte de michael 2:
 CREATE TABLE sucursal( 
     cod_sucursal number(10), 
     nombre_sucursal VARCHAR2(75) NOT NULL,  
     monto_prestamos number(10) NOT NULL,
     cantidad number (10) NOT NULL, 
     CONSTRAINT cod_sucursal PRIMARY KEY (cod_sucursal));
-
+/
 CREATE TABLE Sucursal_tipo_prestamo(
     cod_sucursal number(10),
     tipo_prestamoID number (10),
@@ -19,20 +17,20 @@ CREATE TABLE Sucursal_tipo_prestamo(
     CONSTRAINT pk_sucursal_prestamoID PRIMARY KEY (cod_sucursal,tipo_prestamoID),
     CONSTRAINT fk_cod_sucursal FOREIGN KEY (cod_sucursal) REFERENCES sucursal(cod_sucursal),
     CONSTRAINT fk_tipo_prestamo_sucursal FOREIGN KEY (tipo_prestamoID) REFERENCES tipo_de_prestamo(tipo_prestamoID));
+/
 
-Parte de Aire 3:
 ALTER TABLE cliente ADD cod_sucursal number(10) NOT NULL; 
 ALTER TABLE cliente ADD CONSTRAINT fk_cod_sucursal_cliente FOREIGN KEY (cod_sucursal) REFERENCES sucursal(cod_sucursal); 
 ALTER TABLE prestamo ADD cod_sucursal number(10) NOT NULL; 
 ALTER TABLE prestamo ADD CONSTRAINT fk_cod_sucursalprestamo FOREIGN KEY (cod_sucursal) REFERENCES sucursal(cod_sucursal); 
+/
 
-Parte de joel 4:
 Alter table prestamo ADD saldoactual number (10) NOT NULL;
 Alter table prestamo ADD interespagado number (10) NOT NULL;
 Alter table prestamo ADD fechamodificacion date NOT NULL;
 Alter table prestamo ADD usuario VARCHAR2 (50) NOT NULL;
+/
 
-parte de gaby 5:
 
 CREATE TABLE transacpagos(
     cod_sucursal number(10),
@@ -47,151 +45,7 @@ CREATE TABLE transacpagos(
     CONSTRAINT fk_cod_sucursal_2 FOREIGN KEY (cod_sucursal) REFERENCES sucursal(cod_sucursal),
     CONSTRAINT fk_tipo_prestamo_trans FOREIGN KEY (tipo_prestamoID) REFERENCES tipo_de_prestamo(tipo_prestamoID),
     CONSTRAINT fk_clienteID_trans FOREIGN KEY (clienteID) REFERENCES cliente(clienteID));
-
+/
  
 
 
-CREATE SEQUENCE sequencia_telefono 
- MINVALUE 1 
- START WITH 1 
- INCREMENT BY 1 
- NOCACHE; 
-
-CREATE OR REPLACE PROCEDURE tipo_telefonos(
-p_idtelefono IN OUT Tipo_telefono.telefonoID%TYPE,
-p_descripcion IN OUT Tipo_telefono.Descripcion%TYPE) IS
-
-BEGIN
-
-INSERT INTO tipo_telefono values
-(p_idtelefono,p_descripcion);
-END Tipo_telefonos;
-/
-
-CREATE SEQUENCE secuencia_Correo
-    MINVALUE 1
-    START WITH 1
-    INCREMENT BY 1
-    NOCACHE;
-
-CREATE OR REPLACE PROCEDURE tipo_Correo(
-p_idcorreo IN OUT tipo_correo.tipo_correoID%TYPE,
-p_descripcion IN OUT tipo_correo.descripcion%TYPE) IS
-
-BEGIN 
-
-INSERT INTO tipo_correo values
-(p_idcorreo,p_descripcion);
-
-END Tipo_Correo;
-/
-
-CREATE SEQUENCE secuencia_profesion
-    MINVALUE 1
-    START WITH 1
-    INCREMENT BY 1
-    NOCACHE;
-
-CREATE OR REPLACE PROCEDURE profesion(
-p_idprofesion IN OUT profesion.id_profesion%TYPE,
-p_profesion IN OUT profesion.profesion%TYPE) IS
-
-BEGIN 
-
-INSERT INTO profesion values
-(p_idprofesion,p_profesion);
-
-END profesion;
-/
-
-CREATE SEQUENCE secuencia_prestamo
-    MINVALUE 1
-    START WITH 1
-    INCREMENT BY 1
-    NOCACHE;
-
-CREATE OR REPLACE PROCEDURE tipo_prestamo(
-p_idprestamo IN OUT tipo_de_prestamo.tipo_prestamoID%TYPE,
-p_tipo_prestamo IN OUT tipo_de_prestamo.tipo_prestamo%TYPE) IS
-
-BEGIN 
-
-INSERT INTO tipo_de_prestamo values
-(p_idprestamo,p_tipo_prestamo);
-
-END tipo_prestamo;
-/
-
-CREATE SEQUENCE secuencia_sucursal
-    MINVALUE 1
-    START WITH 1
-    INCREMENT BY 1
-    NOCACHE;
-
-CREATE OR REPLACE PROCEDURE sucursal(
-p_idsucursal IN OUT sucursal.cod_sucursal%TYPE,
-p_nombre_sucursal IN OUT sucursal.nombre_sucursal%TYPE) IS
-
-BEGIN 
-
-INSERT INTO sucursal values
-(p_idsucursal,p_nombre_sucursal);
-
-END sucursal;
-/
-
-drop procedure tipo_telefonos;
-
-
-CREATE OR REPLACE PROCEDURE insertar_cliente(
-p_clienteid IN OUT cliente.ClienteID%TYPE,
-p_cedula IN OUT cliente.cedula%TYPE,
-p_nombre IN OUT cliente.nombre%TYPE,
-p_apellido IN OUT cliente.apellido%TYPE,
-p_sexo IN OUT cliente.sexo%TYPE,
-p_idprofesion IN OUT cliente.id_profesion%TYPE,
-p_fechanacimiento IN OUT cliente.fecha_nacimiento%TYPE,
-p_edad IN OUT cliente.edad%TYPE,
-p_cod_sucursal IN OUT cliente.cod_sucursal%TYPE) IS 
-
-begin
-INSERT INTO cliente values
-(p_clienteid,p_cedula,p_nombre,p_apellido,p_sexo,p_idprofesion,p_fechanacimiento,p_edad,p_cod_sucursal);  
-
-*Debe invocar una funcion que calcule la edad de los clientes*
-end insertar_cliente;
-
-
-
-
-
-
-CREATE SEQUENCE secuencia_sucursal
-    MINVALUE 1
-    START WITH 1
-    INCREMENT BY 1
-    NOCACHE;
-CREATE SEQUENCE secuencia_profesion
-    MINVALUE 1
-    START WITH 1
-    INCREMENT BY 1
-    NOCACHE;
-
-
-
-
-CREATE SEQUENCE secuencia_cliente
-    MINVALUE 1
-    START WITH 1
-    INCREMENT BY 1
-    NOCACHE;
-CREATE SEQUENCE secuencia_prestamo
-    MINVALUE 1
-    START WITH 1
-    INCREMENT BY 1
-    NOCACHE;
-CREATE SEQUENCE secuencia_sucursal
-    MINVALUE 1
-    START WITH 1
-    INCREMENT BY 1
-    NOCACHE;

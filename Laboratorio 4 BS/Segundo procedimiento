@@ -1,4 +1,5 @@
 ALTER SESSION SET nls_date_format='DD/MM/YYYY'; 
+/
 CREATE OR REPLACE FUNCTION calcular_edad(p_calculo_edad IN cliente.fecha_nacimiento%TYPE) 
 RETURN NUMBER
 AS
@@ -7,7 +8,7 @@ BEGIN
 SELECT FLOOR(months_between(sysdate,p_calculo_edad)/12) INTO v_edad FROM dual;
 RETURN v_edad;
 END calcular_edad;
-
+/
 CREATE OR REPLACE PROCEDURE insertar_cliente(
 p_cedula IN cliente.cedula%TYPE,
 p_nombre IN cliente.nombre%TYPE,
@@ -20,19 +21,20 @@ BEGIN
 INSERT INTO cliente (clienteID, cedula, nombre, apellido, sexo, id_profesion, fecha_nacimiento, cod_sucursal, edad) values
 (SECUENCIA_CLIENTE.nextval,p_cedula,p_nombre,p_apellido,p_sexo,p_profesion,p_fechanacimiento,p_sucursal, calcular_edad(p_fechanacimiento));
 end insertar_cliente;
-
+/
 BEGIN
     insertar_cliente('8-977-47','Joel','Aparicio','M',1,TO_DATE('01/12/1994','DD/MM/YYYY'),1);
 END;
-
+/
 BEGIN
     insertar_cliente('8-973-789','Airlenys','Recuero','F',2,TO_DATE('01/07/1999','DD/MM/YYYY'),2);
 END;
-
+/
 BEGIN
     insertar_cliente('8-923-2393','Michael','Cerrud','M',3,TO_DATE('01/06/1997','DD/MM/YYYY'),1);
 END;
-
+/
 BEGIN
     insertar_cliente('8-991-4938','Gariela','Vasquez','F',4,TO_DATE('26/03/2001','DD/MM/YYYY'),2);
 END;
+/
