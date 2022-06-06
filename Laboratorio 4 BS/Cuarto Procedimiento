@@ -12,14 +12,14 @@ VALUES (secuencia_transaccion.nextval, p_cod_sucursal, p_id_cliente, p_tipo_pres
 END insertar_transaccion;
 /
 BEGIN
-insertar_transaccion (2,2,3,TO_DATE('08/04/2021','DD/MM/YYYY'),2500,TO_DATE('08/04/2021 12:29:53','DD/MM/YY HH24:MI:SS'),'N'); 
+insertar_transaccion (2,2,3,TO_DATE('08/04/2021','DD/MM/YYYY'),2500); 
 END;
 /
 BEGIN
-insertar_transaccion (1,3,1,TO_DATE('09/04/2021','DD/MM/YYYY'),1000,TO_DATE('09/04/2021 01:03:29','DD/MM/YY HH24:MI:SS'),'N'); 
+insertar_transaccion (1,3,1,TO_DATE('09/04/2021','DD/MM/YYYY'),1000); 
 END;
 /
 BEGIN
-insertar_transaccion (1,1,1,TO_DATE('07/04/2021','DD/MM/YYYY'),2000,TO_DATE('07/04/2021 10:37:23','DD/MM/YY HH24:MI:SS')); 
+insertar_transaccion (1,1,1,TO_DATE('07/04/2021','DD/MM/YYYY'),2000); 
 END;
 /

@@ -5,8 +5,7 @@ CREATE OR REPLACE FUNCTION calculo_interes(
 BEGIN
     RETURN p_Saldo_actual*p_tasa;
 END calculo_interes;
-
-
+/
 CREATE OR REPLACE PROCEDURE actualizacion_pago AS
 v_cod_sucursal      transacpagos.cod_sucursal%TYPE;
 v_cliente           transacpagos.clienteid%TYPE;
@@ -19,24 +18,20 @@ v_tasa              Prestamo.Tasa_interes%TYPE;
 v_interespagado     prestamo.interespagado%TYPE;
 v_interes           Prestamo.interespagado%TYPE;
 V_sobrante number;
-
 CURSOR c_actualizar_pagos IS
 SELECT cod_sucursal, clienteID, tipo_prestamoid, Monto_del_pago, Id_Transaccion, Fecha_transaccion
 FROM Transacpagos
-WHERE STATUS = 'N';
-
+WHERE STATUS = 'n';
 BEGIN
     OPEN c_actualizar_pagos;
     LOOP
         FETCH c_actualizar_pagos INTO v_cod_sucursal, v_cliente, v_Tipo_Prestamo, v_Montodepago, v_id_transaccion, v_fechatransaccion;
         EXIT WHEN c_actualizar_pagos%NOTFOUND;
-
         SELECT Saldoactual,tasa_interes, interespagado
         INTO v_Saldo_actual, v_tasa, v_interespagado
         FROM PRESTAMO
         WHERE clienteID = v_cliente AND tipo_prestamoid = V_Tipo_Prestamo;
         v_interes:=calculo_interes(v_Saldo_actual,v_tasa);
-
         IF v_interes> v_interespagado THEN
             V_sobrante:= v_Montodepago-(v_interes-v_interespagado);
             IF V_sobrante>=0 THEN
@@ -64,7 +59,6 @@ BEGIN
                 Fecha_pago = v_fechatransaccion
                 WHERE clienteID = v_cliente AND tipo_prestamoid=v_Tipo_Prestamo; 
             END IF;
-
         ELSE
             UPDATE Prestamo
             SET 
@@ -85,17 +79,31 @@ BEGIN
     UPDATE transacpagos
     SET Status='S'
     WHERE Id_Transaccion=v_id_transaccion;
-
     END LOOP;
     CLOSE c_actualizar_pagos;
-
 END actualizacion_pago;
-
-
+/
 BEGIN
 actualizacion_pago;
 END;
+/
+create or replace view prestamo_cliente as
+select c.clienteid as "Codigo de cliente",c.nombre || ' ' ||c.apellido as "Cliente", t.tipo_prestamo as "Tipo de prestamo",p.fecha_aprobado as "Fecha de aprobacion",
+p.monto_aprobado as "Monto aprobado", s.nombre_sucursal as "Sucursal"
+from cliente c , tipo_de_prestamo t, prestamo p, sucursal s
+where c.clienteid = p.clienteid and t.tipo_prestamoid = p.tipo_prestamoid and c.cod_sucursal = s.cod_sucursal
+order by c.clienteid asc;
 
+select * from prestamo_cliente;
+
+create or replace view sucursal_prestamo as
+select s.nombre_sucursal as "Sucursal", s.monto_prestamos as "Prestamos por sucursal",
+       s.cantidad as "Cantidad de prestamos", t.monto_prestamos as "Monto de prestamo",d.tipo_prestamo as "Tipo de prestamo",t.cantidad as "Cantidad de tipo prestamo",
+       p.usuario as "Usuario"
+from sucursal s, sucursal_tipo_prestamo t,prestamo p, tipo_de_prestamo d
+where s.cod_sucursal=p.cod_sucursal and t.tipo_Prestamoid = d.tipo_prestamoid and p.tipo_prestamoid=d.tipo_prestamoid;
+
+select * from sucursal_prestamo;
 
 
 

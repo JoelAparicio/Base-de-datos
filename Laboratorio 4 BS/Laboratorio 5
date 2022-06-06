@@ -40,6 +40,7 @@ CREATE TABLE transacpagos(
     monto_del_pago number(10) NOT NULL, 
     fecha_insercion date NOT NULL,
     usuario Varchar2 (50) NOT NULL,
+    status char (1) default 'N' NOT NULL,
     CONSTRAINT pk_id_transaccion PRIMARY KEY (id_transaccion),
     CONSTRAINT fk_cod_sucursal_2 FOREIGN KEY (cod_sucursal) REFERENCES sucursal(cod_sucursal),
     CONSTRAINT fk_tipo_prestamo_trans FOREIGN KEY (tipo_prestamoID) REFERENCES tipo_de_prestamo(tipo_prestamoID),

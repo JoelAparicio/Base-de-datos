@@ -44,5 +44,5 @@ delete from prestamo;
 delete from correo;
 delete from cliente;
 
-alter table prestamo
- modify fecha_pago null;
+alter table transacpagos
+ add status char (1) default 'N' NOT NULL;
