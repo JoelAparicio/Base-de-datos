@@ -1,6 +1,6 @@
 ALTER TABLE cliente 
     ADD edad number(3) not null;
-/
+
 
 CREATE TABLE sucursal( 
     cod_sucursal number(10), 
@@ -8,7 +8,7 @@ CREATE TABLE sucursal(
     monto_prestamos number(10) NOT NULL,
     cantidad number (10) NOT NULL, 
     CONSTRAINT cod_sucursal PRIMARY KEY (cod_sucursal));
-/
+
 CREATE TABLE Sucursal_tipo_prestamo(
     cod_sucursal number(10),
     tipo_prestamoID number (10),
@@ -17,19 +17,18 @@ CREATE TABLE Sucursal_tipo_prestamo(
     CONSTRAINT pk_sucursal_prestamoID PRIMARY KEY (cod_sucursal,tipo_prestamoID),
     CONSTRAINT fk_cod_sucursal FOREIGN KEY (cod_sucursal) REFERENCES sucursal(cod_sucursal),
     CONSTRAINT fk_tipo_prestamo_sucursal FOREIGN KEY (tipo_prestamoID) REFERENCES tipo_de_prestamo(tipo_prestamoID));
-/
+
 
 ALTER TABLE cliente ADD cod_sucursal number(10) NOT NULL; 
 ALTER TABLE cliente ADD CONSTRAINT fk_cod_sucursal_cliente FOREIGN KEY (cod_sucursal) REFERENCES sucursal(cod_sucursal); 
 ALTER TABLE prestamo ADD cod_sucursal number(10) NOT NULL; 
 ALTER TABLE prestamo ADD CONSTRAINT fk_cod_sucursalprestamo FOREIGN KEY (cod_sucursal) REFERENCES sucursal(cod_sucursal); 
-/
 
 Alter table prestamo ADD saldoactual number (10) NOT NULL;
 Alter table prestamo ADD interespagado number (10) NOT NULL;
 Alter table prestamo ADD fechamodificacion date NOT NULL;
 Alter table prestamo ADD usuario VARCHAR2 (50) NOT NULL;
-/
+
 
 
 CREATE TABLE transacpagos(
@@ -45,7 +44,7 @@ CREATE TABLE transacpagos(
     CONSTRAINT fk_cod_sucursal_2 FOREIGN KEY (cod_sucursal) REFERENCES sucursal(cod_sucursal),
     CONSTRAINT fk_tipo_prestamo_trans FOREIGN KEY (tipo_prestamoID) REFERENCES tipo_de_prestamo(tipo_prestamoID),
     CONSTRAINT fk_clienteID_trans FOREIGN KEY (clienteID) REFERENCES cliente(clienteID));
-/
+
  
 
 

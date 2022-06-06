@@ -9,7 +9,8 @@ CREATE OR REPLACE PROCEDURE insersion_prestamo(
     
 BEGIN
     INSERT INTO prestamo (clienteid, tipo_prestamoID, numero_prestamo, fecha_aprobado, monto_aprobado, tasa_interes, letra_mensual, monto_pagado, fecha_pago,cod_sucursal,saldoactual, interespagado, fechamodificacion, usuario)  values 
-    (p_clienteid,p_tipo_prestamo, SECUENCIA_PRESTAMO.nextval, p_fecha_aprobado, p_monto_aprobado, p_tasa_interes, p_letra_mensual, 0, null ,p_cod_sucursal,p_monto_aprobado, 0, p_fecha_aprobado, user);
+    (p_clienteid,p_tipo_prestamo, SECUENCIA_PRESTAMO.nextval, p_fecha_aprobado, p_monto_aprobado, p_tasa_interes, p_letra_mensual, 0, p_fecha_aprobado ,p_cod_sucursal,p_monto_aprobado, 0, p_fecha_aprobado, user);
+    
 UPDATE sucursal
 SET monto_prestamos = monto_prestamos + p_monto_aprobado
 WHERE cod_sucursal = p_cod_sucursal;

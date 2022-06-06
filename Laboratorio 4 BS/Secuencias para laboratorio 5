@@ -19,7 +19,7 @@ CREATE SEQUENCE secuencia_telefono
 CREATE SEQUENCE secuencia_transaccion
     START WITH 1
     INCREMENT BY 1;
- /   
+ 
 
 
 drop sequence secuencia_cliente;
