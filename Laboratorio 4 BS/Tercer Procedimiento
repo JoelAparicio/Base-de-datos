@@ -6,31 +6,21 @@ CREATE OR REPLACE PROCEDURE insersion_prestamo(
     p_tasa_interes IN prestamo.tasa_interes%TYPE,
     p_letra_mensual IN prestamo.letra_mensual%TYPE,
     p_cod_sucursal IN prestamo.cod_sucursal%TYPE) IS
-    
 BEGIN
     INSERT INTO prestamo (clienteid, tipo_prestamoID, numero_prestamo, fecha_aprobado, monto_aprobado, tasa_interes, letra_mensual, monto_pagado, fecha_pago,cod_sucursal,saldoactual, interespagado, fechamodificacion, usuario)  values 
     (p_clienteid,p_tipo_prestamo, SECUENCIA_PRESTAMO.nextval, p_fecha_aprobado, p_monto_aprobado, p_tasa_interes, p_letra_mensual, 0, p_fecha_aprobado ,p_cod_sucursal,p_monto_aprobado, 0, p_fecha_aprobado, user);
-    
 UPDATE sucursal
-SET monto_prestamos = monto_prestamos + p_monto_aprobado
+SET monto_prestamos = monto_prestamos + p_monto_aprobado,
+    cantidad = cantidad + 1
 WHERE cod_sucursal = p_cod_sucursal;
-
-UPDATE sucursal
-SET cantidad = cantidad + 1
-WHERE cod_sucursal = p_cod_sucursal;
-
 UPDATE Sucursal_tipo_prestamo
-SET monto_prestamos = monto_prestamos + p_monto_aprobado
+SET monto_prestamos = monto_prestamos + p_monto_aprobado,
+    cantidad = cantidad + 1
 WHERE tipo_prestamoID = p_tipo_prestamo;
-
 IF SQL%NOTFOUND THEN
     INSERT INTO Sucursal_tipo_prestamo(cod_sucursal, tipo_prestamoid, monto_prestamos, cantidad)
     VALUES (p_cod_sucursal, p_tipo_prestamo, p_monto_aprobado, 0);
-    END IF;
-
-UPDATE Sucursal_tipo_prestamo
-SET cantidad = cantidad + 1
-WHERE tipo_prestamoID = p_tipo_prestamo;
+END IF;
 END insersion_prestamo;
 /
 Begin
