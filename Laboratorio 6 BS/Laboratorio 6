@@ -31,7 +31,7 @@ CREATE TABLE ahorros(
     fecha_de_modificacion DATE,
     usuario VARCHAR(15) NOT NULL,
 
-    CONSTRAINT id_cliente_sucursal_pk PRIMARY KEY (id_cliente), 
+    CONSTRAINT numero_cuenta_pk PRIMARY KEY (numero_cuenta), 
     CONSTRAINT id_tipo_ahorro_fk1 FOREIGN KEY (id_tipo_ahorro) REFERENCES tipo_de_ahorro(id_tipo_ahorro),
     CONSTRAINT id_sucursal_fk FOREIGN KEY (id_sucursal) REFERENCES sucursal(id_sucursal));
 
@@ -73,3 +73,37 @@ CREATE TABLE transacciones(
 	CONSTRAINT id_tipo_ahorro_fk2 FOREIGN KEY (id_tipo_ahorro) REFERENCES tipo_de_ahorro(id_tipo_ahorro),
 	CONSTRAINT id_sucursal_fk2    FOREIGN KEY (id_sucursal) REFERENCES sucursal(id_sucursal));
 
+CREATE OR REPLACE FUNCTION calculo_interes(
+    p_monto_transaccion IN transacciones.monto_transaccion%TYPE,
+    p_tasa_interes IN tipo_de_ahorro.tasa_interes%TYPE)
+    RETURN ahorros.saldo_del_interes%TYPE IS 
+BEGIN
+    RETURN p_monto_transaccion*p_tasa_interes;
+END calculo_interes;
+
+CREATE OR REPLACE PROCEDURE actualizacion_pago AS
+v_id_sucursal       	transacciones.id_sucursal%TYPE,
+v_id_transaccion    	transacciones.id_transaccion%TYPE,
+v_id_cliente        	transacciones.id_cliente%TYPE,
+v_id_tipo_ahorro    	transacciones.id_tipo_ahorro%TYPE,
+v_tipo_transaccion  	transacciones.tipo_transaccion%TYPE,
+v_fecha_insersion       transacciones.fecha_insersion%TYPE,
+v_fecha_transaccion     transacciones.fecha_transaccion%TYPE,
+
+
+CURSOR c_actualizar IS
+SELECT id_sucursal, id_transaccion, id_cliente, id_tipo_ahorro, tipo_transaccion, fecha_insersion, fecha_transaccion
+FROM transacciones
+WHERE STATUS = 'n' AND (tipo_transaccion = 1 OR tipo_transaccion = 2);
+BEGIN
+    OPEN c_actualizar;
+    LOOP
+        FETCH c_actualizar INTO v_id_sucursal,v_id_transaccion, v_id_cliente,v_id_tipo_ahorro, v_tipo_transaccion, v_fecha_insersion;
+        EXIT WHEN c_actualizar_pagos%NOTFOUND;
+        
+    END LOOP;
+    CLOSE c_actualizar;
+EXCEPTION
+    WHEN CURSOR_ALREADY_OPEN THEN
+      DBMS_OUTPUT.PUT_LINE('CURSOR YA ABIERTO.');
+END actualizacion_pago;
