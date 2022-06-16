@@ -1,5 +1,3 @@
-Parte de Airlenys
----------------------------------
 CREATE TABLE tipo_de_ahorro(
     id_tipo_ahorro 			number (10) NOT NULL,
     descripcion 			varchar2 (200) NOT NULL,
@@ -13,9 +11,52 @@ CREATE TABLE sucursal(
     monto_ahorrado 			number(10) NOT NULL, 
     CONSTRAINT id_sucursal_pk    PRIMARY KEY (ID_sucursal),
     CONSTRAINT id_tipo_ahorro_fk FOREIGN KEY (ID_tipo_ahorro) REFERENCES tipo_de_ahorro(ID_tipo_ahorro));
-------------------------------------------------------------------------------------------------------------------------------------------------
-Parte de Joel
----------------------------------
+
+CREATE SEQUENCE numero_cuenta
+    START WITH 1
+    INCREMENT BY 1;
+
+CREATE TABLE ahorros(
+    id_cliente NUMBER(10) NOT NULL, 
+    id_sucursal NUMBER(10) NOT NULL,
+    id_tipo_ahorro NUMBER(10) NOT NULL,
+    numero_cuenta NUMBER(10) NOT NULL,
+    tasa_de_interes NUMBER(10) NOT NULL,
+    letra_deposito_mensual NUMBER(10) NOT NULL,
+    saldo_del_ahorro NUMBER(10),
+    saldo_del_interes NUMBER(10) NOT NULL,
+    fecha_de_apertura DATE NOT NULL,
+    fecha_de_deposito DATE NOT NULL,
+    fecha_de_retiro DATE NOT NULL,
+    fecha_de_modificacion DATE,
+    usuario VARCHAR(15) NOT NULL,
+
+    CONSTRAINT id_cliente_sucursal_pk PRIMARY KEY (id_cliente), 
+    CONSTRAINT id_tipo_ahorro_fk1 FOREIGN KEY (id_tipo_ahorro) REFERENCES tipo_de_ahorro(id_tipo_ahorro),
+    CONSTRAINT id_sucursal_fk FOREIGN KEY (id_sucursal) REFERENCES sucursal(id_sucursal));
+
+CREATE SEQUENCE id_transaccion 
+    START WITH 1
+    INCREMENT BY 1;
+
+CREATE TABLE auditoria (
+id_transaccion      number (10) NOT NULL,
+Tabla               number (10) NOT NULL,
+Tipo_operacion      char(1) NOT NULL,
+id_cliente          number (10) NOT NULL,
+id_tipo_ahorro      number (10) NOT NULL,
+tipo_transaccion    number (1) NOT NULL,
+Saldo_Anterior      number(10) NOT NULL,
+monto_deposito      number (10) NOT NULL,
+Saldo_Final         number(10) NOT NULL,
+usuario             varchar2 (50) NOT NULL,
+fecha               date NOT NULL,
+
+CONSTRAINT PK_Tabla PRIMARY KEY (Tabla),
+CONSTRAINT FK_id_transaccion1 FOREIGN KEY (id_transaccion) REFERENCES transacciones(id_transaccion),
+CONSTRAINT FK_id_cliente2 FOREIGN KEY (id_cliente) REFERENCES ahorros(id_cliente),
+CONSTRAINT FK_id_tipo_ahorro3 FOREIGN KEY (id_tipo_ahorro) REFERENCES tipo_de_ahorro(id_tipo_ahorro));
+
 CREATE TABLE transacciones(
 	id_sucursal    			number (10)     NOT NULL,
 	id_transaccion 			number (10)     NOT NULL,
@@ -27,8 +68,8 @@ CREATE TABLE transacciones(
 	status        		    char (1)        NOT NULL,
 	fecha_insersion 		date            NOT NULL,
 	usuario           		varchar2(50)    NOT NULL,
-	CONSTRAINT id_transaccion_pk  PRIMARY KEY transacciones(id_transaccion),
-	CONSTRAINT id_cliente_fk2     FOREIGN KEY transacciones(id_cliente) REFERENCES ahorros(id_cliente),
-	CONSTRAINT id_tipo_ahorro_fk2 FOREIGN KEY transacciones(id_tipo_ahorro) REFERENCES tipo_de_ahorro(id_tipo_ahorro),
-	CONSTRAINT id_sucursal_fk2    FOREIGN KEY transacciones(id_sucursal) REFERENCES ahorros(id_sucursal));
-------------------------------------------------------------------------------------------------------------------------------------------------
+	CONSTRAINT id_transaccion_pk  PRIMARY KEY (id_transaccion),
+	CONSTRAINT id_cliente_fk2     FOREIGN KEY (id_cliente) REFERENCES ahorros(id_cliente),
+	CONSTRAINT id_tipo_ahorro_fk2 FOREIGN KEY (id_tipo_ahorro) REFERENCES tipo_de_ahorro(id_tipo_ahorro),
+	CONSTRAINT id_sucursal_fk2    FOREIGN KEY (id_sucursal) REFERENCES sucursal(id_sucursal));
+
