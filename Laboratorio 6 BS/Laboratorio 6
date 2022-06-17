@@ -4,13 +4,34 @@ CREATE TABLE tipo_de_ahorro(
     tasa_interes 			number (10) NOT NULL,
     CONSTRAINT id_tipo_ahorro_pk PRIMARY KEY (ID_tipo_ahorro));
 
-CREATE TABLE sucursal( 
-    id_sucursal 			number(10) NOT NULL, 
-    nombre_sucursal 		varchar2(75) NOT NULL, 
-    id_tipo_ahorro 			number (10) NOT NULL, 
-    monto_ahorrado 			number(10) NOT NULL, 
-    CONSTRAINT id_sucursal_pk    PRIMARY KEY (ID_sucursal),
-    CONSTRAINT id_tipo_ahorro_fk FOREIGN KEY (ID_tipo_ahorro) REFERENCES tipo_de_ahorro(ID_tipo_ahorro));
+CREATE TABLE Sucursal_tipo_ahorro(
+    id_sucursal         number(10),
+    id_tipo_ahorro      number (10),
+    monto_ahorrado      number(10) NOT NULL,
+    cantidad_tipo_ahorro     number (10) NOT NULL, 
+    CONSTRAINT id_sucursal_ahorro_pk PRIMARY KEY (id_sucursal,id_tipo_ahorro),
+    CONSTRAINT id_sucursal_fk FOREIGN KEY (id_sucursal) REFERENCES sucursal(id_sucursal),
+    CONSTRAINT id_tipo_ahorro_fk FOREIGN KEY (id_tipo_ahorro) REFERENCES tipo_de_ahorro(id_tipo_ahorro)
+    
+);
+
+
+ALTER TABLE sucursal ADD monto_ahorrado number (10) NOT NULL;
+ALTER TABLE sucursal ADD cantidad_ahorro number (10) NOT NULL;
+
+
+-- Solución más rapida borrar tabla y volver a crearla
+-- CREATE TABLE sucursal( 
+--     id_sucursal 			number(10) NOT NULL, 
+--     nombre_sucursal 		varchar2(75) NOT NULL, 
+--     monto_ahorrado 			number(10) NOT NULL,
+--     cantidad_ahorro         number (10) NOT NULL,
+--     monto_prestamos         number(10) NOT NULL,
+--     cantidad_prestamos      number (10) NOT NULL,
+--     CONSTRAINT id_sucursal_pk    PRIMARY KEY (ID_sucursal),
+-- );
+
+
 
 CREATE SEQUENCE numero_cuenta
     START WITH 1
@@ -103,6 +124,49 @@ tipo_de_ahorro('Escolar','0.06');
 END;
 /
 
+
+------------------Procedimiento2Airlenys----------------------------
+
+CREATE OR REPLACE PROCEDURE insercion_ahorro(
+p_id_cliente             IN ahorros.id_cliente%TYPE,
+p_sucursal               IN ahorros.id_sucursal%TYPE,
+p_tipo_ahorro            IN ahorros.id_tipo_ahorro%TYPE,
+p_numero_cuenta          IN ahorros.numero_cuenta%TYPE,
+p_tasa_de_interes        IN ahorros.tasa_de_interes%TYPE,
+p_letra_deposito_mensual IN ahorros.letra_deposito_mensual%TYPE,
+p_saldo_del_ahorro       IN ahorros.saldo_del_ahorro%TYPE) IS 
+---CREAR DEPOSITO---
+
+BEGIN
+    IF numero_cuenta = p_numero_cuenta AND id_cliente = p_id_cliente THEN
+        INSERT INTO ahorros (id_cliente, id_sucursal, id_tipo_ahorro, numero_cuenta, fecha_de_deposito, usuario)
+        values (p_id_cliente, p_sucursal, p_tipo_ahorro, p_numero_cuenta, sysdate, user);
+
+        UPDATE ahorros
+        SET saldo_del_ahorro = saldo_del_ahorro + p_saldo_del_ahorro,
+        WHERE numero_cuenta = p_numero_cuenta;
+
+    ELSE
+        INSERT INTO ahorros (id_cliente, id_sucursal, id_tipo_ahorro, numero_cuenta, tasa_de_interes, letra_deposito_mensual, saldo_del_ahorro, fecha_de_apertura, fecha_de_deposito, usuario)
+        values (p_id_cliente, p_sucursal, p_tipo_ahorro, numero_cuenta.nextval, p_tasa_de_interes, p_letra_deposito_mensual, p_saldo_del_ahorro, sysdate, sysdate, user);
+    END IF;
+
+EXCEPTION
+    WHEN DUP_VAL_ON_INDEX THEN
+      DBMS_OUTPUT.PUT_LINE('INSERCION DUPLICADA.');
+
+end insercion_ahorro;
+/
+
+BEGIN
+insercion_ahorro (1,1,1,'0.06',20,100) 
+END;
+/
+
+
+
+
+------------------Procedimiento3MiChael----------------------------
 CREATE SEQUENCE SECUENCIA_TRANSACCION
     START WITH 1
     INCREMENT BY 1;
@@ -133,7 +197,7 @@ END;
 
 
 
-
+------------------Procedimiento4Joel----------------------------
 CREATE OR REPLACE FUNCTION calculo_interes(
     p_monto_transaccion IN transacciones.monto_transaccion%TYPE,
     p_tasa_interes IN tipo_de_ahorro.tasa_interes%TYPE)
