@@ -73,6 +73,36 @@ CREATE TABLE transacciones(
 	CONSTRAINT id_tipo_ahorro_fk2 FOREIGN KEY (id_tipo_ahorro) REFERENCES tipo_de_ahorro(id_tipo_ahorro),
 	CONSTRAINT id_sucursal_fk2    FOREIGN KEY (id_sucursal) REFERENCES sucursal(id_sucursal));
 
+CREATE SEQUENCE secuencia_ahorro
+    START WITH 1
+    INCREMENT BY 1;
+
+CREATE OR REPLACE PROCEDURE insercion_tipo_ahorro(
+p_descripcion         IN     tipo_de_ahorro.descripcion%TYPE,
+p_tasa_interes         IN     tipo_de_ahorro.tasa_interes%TYPE,
+) AS
+
+BEGIN
+
+INSERT INTO tipo_de_ahorro(id_tipo_ahorro,descripcion,tasa_interes)
+VALUES (secuencia_ahorro.nextval,p_descripcion,p_tasa_interes )
+
+END tipo_ahorro;
+
+/
+BEGIN 
+tipo_de_ahorro('Navidad','0.06');
+END;
+/
+BEGIN 
+tipo_de_ahorro('Corriente','0.04');
+END;
+/
+BEGIN 
+tipo_de_ahorro('Escolar','0.06');
+END;
+/
+
 CREATE SEQUENCE SECUENCIA_TRANSACCION
     START WITH 1
     INCREMENT BY 1;
