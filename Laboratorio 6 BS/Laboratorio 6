@@ -48,7 +48,7 @@ CREATE TABLE ahorros(
     saldo_del_interes NUMBER(10) NOT NULL,
     fecha_de_apertura DATE NOT NULL,
     fecha_de_deposito DATE NOT NULL,
-    fecha_de_retiro DATE NOT NULL,
+    fecha_de_retiro DATE,
     fecha_de_modificacion DATE,
     usuario VARCHAR(15) NOT NULL,
 
@@ -97,18 +97,16 @@ CREATE TABLE transacciones(
 CREATE SEQUENCE secuencia_ahorro
     START WITH 1
     INCREMENT BY 1;
-
+------------------Procedimiento1Gabriela----------------------------
 CREATE OR REPLACE PROCEDURE insercion_tipo_ahorro(
 p_descripcion         IN     tipo_de_ahorro.descripcion%TYPE,
-p_tasa_interes         IN     tipo_de_ahorro.tasa_interes%TYPE,
-) AS
+p_tasa_interes         IN     tipo_de_ahorro.tasa_interes%TYPE) AS
 
 BEGIN
 
 INSERT INTO tipo_de_ahorro(id_tipo_ahorro,descripcion,tasa_interes)
-VALUES (secuencia_ahorro.nextval,p_descripcion,p_tasa_interes )
-
-END tipo_ahorro;
+VALUES (secuencia_ahorro.nextval,p_descripcion,p_tasa_interes);
+END insercion_tipo_ahorro;
 
 /
 BEGIN 
@@ -124,8 +122,7 @@ tipo_de_ahorro('Escolar','0.06');
 END;
 /
 
-
-------------------Procedimiento2Airlenys----------------------------
+-------------------Procedimiento2Airlenys----------------------------
 
 CREATE OR REPLACE PROCEDURE insercion_ahorro(
 p_id_cliente             IN ahorros.id_cliente%TYPE,
@@ -134,36 +131,37 @@ p_tipo_ahorro            IN ahorros.id_tipo_ahorro%TYPE,
 p_numero_cuenta          IN ahorros.numero_cuenta%TYPE,
 p_tasa_de_interes        IN ahorros.tasa_de_interes%TYPE,
 p_letra_deposito_mensual IN ahorros.letra_deposito_mensual%TYPE,
-p_saldo_del_ahorro       IN ahorros.saldo_del_ahorro%TYPE) IS 
+p_saldo_del_ahorro       IN ahorros.saldo_del_ahorro%TYPE,
+p_control                IN char(1)) IS 
 ---CREAR DEPOSITO---
-
 BEGIN
-    IF numero_cuenta = p_numero_cuenta AND id_cliente = p_id_cliente THEN
-        INSERT INTO ahorros (id_cliente, id_sucursal, id_tipo_ahorro, numero_cuenta, fecha_de_deposito, usuario)
-        values (p_id_cliente, p_sucursal, p_tipo_ahorro, p_numero_cuenta, sysdate, user);
+        IF p_control = A THEN
+        	UPDATE ahorros
+        	SET saldo_del_ahorro = saldo_del_ahorro + p_saldo_del_ahorro,
+        		fecha_de_deposito = sysdate,
+        		fecha_de_modificacion = sysdate
+        	WHERE numero_cuenta = p_numero_cuenta AND id_cliente = p_id_cliente;
+        	IF SQL%NOTFOUND THEN
+        		INSERT INTO ahorros (id_cliente, id_sucursal, id_tipo_ahorro, numero_cuenta, tasa_de_interes, letra_deposito_mensual, saldo_del_ahorro,saldo_del_interes, fecha_de_apertura, fecha_de_deposito,fecha_de_retiro,fecha_de_modificacion, usuario)
+	        	values (p_id_cliente, p_sucursal, p_tipo_ahorro, numero_cuenta.nextval, p_tasa_de_interes, p_letra_deposito_mensual, p_saldo_del_ahorro,0, sysdate, sysdate,null,sysdate, user);
+	    	END IF;
 
-        UPDATE ahorros
-        SET saldo_del_ahorro = saldo_del_ahorro + p_saldo_del_ahorro,
-        WHERE numero_cuenta = p_numero_cuenta;
-
-    ELSE
-        INSERT INTO ahorros (id_cliente, id_sucursal, id_tipo_ahorro, numero_cuenta, tasa_de_interes, letra_deposito_mensual, saldo_del_ahorro, fecha_de_apertura, fecha_de_deposito, usuario)
-        values (p_id_cliente, p_sucursal, p_tipo_ahorro, numero_cuenta.nextval, p_tasa_de_interes, p_letra_deposito_mensual, p_saldo_del_ahorro, sysdate, sysdate, user);
-    END IF;
+    	ELSE
+			INSERT INTO ahorros (id_cliente, id_sucursal, id_tipo_ahorro, numero_cuenta, tasa_de_interes, letra_deposito_mensual, saldo_del_ahorro,saldo_del_interes, fecha_de_apertura, fecha_de_deposito,fecha_de_retiro,fecha_de_modificacion, usuario)
+	        values (p_id_cliente, p_sucursal, p_tipo_ahorro, numero_cuenta.nextval, p_tasa_de_interes, p_letra_deposito_mensual, p_saldo_del_ahorro,0, sysdate, sysdate,null,sysdate, user);
+	    END IF;
 
 EXCEPTION
     WHEN DUP_VAL_ON_INDEX THEN
       DBMS_OUTPUT.PUT_LINE('INSERCION DUPLICADA.');
 
-end insercion_ahorro;
+END insercion_ahorro;
 /
 
 BEGIN
-insercion_ahorro (1,1,1,'0.06',20,100) 
+insercion_ahorro (1,1,1,1,0.06,20,100,'A') 
 END;
 /
-
-
 
 
 ------------------Procedimiento3MiChael----------------------------
