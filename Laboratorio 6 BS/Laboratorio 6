@@ -165,31 +165,32 @@ END;
 
 
 ------------------Procedimiento3MiChael----------------------------
-CREATE SEQUENCE SECUENCIA_TRANSACCION
+CREATE SEQUENCE secuencia_transaccion
     START WITH 1
     INCREMENT BY 1;
 
-CREATE OR REPLACE PROCEDURE registro(
+CREATE OR REPLACE PROCEDURE registro_transaccion(
+p_id_sucursal    transacciones.id_sucursal%TYPE,
 p_id_cliente   transacciones.id_cliente%TYPE,
 p_id_tipo_ahorro   transacciones.id_tipo_ahorro%TYPE,
-p_monto_transaccion    transacciones.monto_transaccion%TYPE,
-p_id_sucursal    transacciones.id_sucursal%TYPE
-) AS
+p_tipo_transaccion  transacciones.tipo_transaccion%TYPE,
+p_monto_transaccion    transacciones.monto_transaccion%TYPE) AS
 
 BEGIN
-INSERT INTO transacciones(p_id_cliente, SECUENCIA_TRANSACCION.nextval, p_id_tipo_ahorro,p_monto_transaccion, p_id_sucursal)
-END registro;
+INSERT INTO transacciones(id_sucursal,id_transaccion,id_cliente,id_tipo_ahorro,fecha_transaccion,tipo_transaccion,monto_transaccion,status,fecha_insersion,usuario)
+VALUES (p_id_sucursal,secuencia_transaccion.nextval,p_id_cliente,p_id_tipo_ahorro,sysdate,p_tipo_transaccion,p_monto_transaccion,'N',sysdate,user);
+END registro_transaccion;
 /
 BEGIN
-registro(7363, 1, 175.00, 2)
-/
-END;
-BEGIN
-registro(6274, 3, 25.00, 2)
+registro(1, 1, 2, 2, 175.00);
 /
 END;
 BEGIN
-registro(9234, 2, 79.00, 1)
+registro(2, 3, 1, 1, 74.00);
+/
+END;
+BEGIN
+registro(2, 2, 3, 2, 95.00);
 /
 END;
 
