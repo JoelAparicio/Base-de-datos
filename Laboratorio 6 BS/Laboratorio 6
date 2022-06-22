@@ -73,8 +73,7 @@ Saldo_Final         number(10) NOT NULL,
 usuario             varchar2 (50) NOT NULL,
 fecha               date NOT NULL,
 
-CONSTRAINT PK_Tabla PRIMARY KEY (Tabla),
-CONSTRAINT FK_id_transaccion1 FOREIGN KEY (id_transaccion) REFERENCES transacciones(id_transaccion),
+CONSTRAINT PK_id_transaccion2 PRIMARY KEY (id_transaccion),
 CONSTRAINT FK_id_cliente2 FOREIGN KEY (id_cliente) REFERENCES ahorros(id_cliente),
 CONSTRAINT FK_id_tipo_ahorro3 FOREIGN KEY (id_tipo_ahorro) REFERENCES tipo_de_ahorro(id_tipo_ahorro));
 
@@ -133,7 +132,7 @@ p_tasa_de_interes        IN ahorros.tasa_de_interes%TYPE,
 p_letra_deposito_mensual IN ahorros.letra_deposito_mensual%TYPE,
 p_saldo_del_ahorro       IN ahorros.saldo_del_ahorro%TYPE,
 p_control                IN char(1)) IS 
----CREAR DEPOSITO---
+
 BEGIN
         IF p_control = A THEN
         	UPDATE ahorros
@@ -250,3 +249,5 @@ EXCEPTION
     WHEN CURSOR_ALREADY_OPEN THEN
       DBMS_OUTPUT.PUT_LINE('CURSOR YA ABIERTO.');
 END actualizacion_pago;
+
+
