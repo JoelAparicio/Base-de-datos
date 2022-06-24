@@ -21,13 +21,12 @@ ALTER TABLE sucursal ADD cantidad_ahorro number (10) NOT NULL;
 
 
 -- Solución más rapida borrar tabla y volver a crearla
--- CREATE TABLE sucursal( 
---     id_sucursal 			number(10) NOT NULL, 
---     nombre_sucursal 		varchar2(75) NOT NULL, 
---     monto_ahorrado 			number(10) NOT NULL,
---     cantidad_ahorro         number (10) NOT NULL,
---     CONSTRAINT id_sucursal_pk    PRIMARY KEY (ID_sucursal),
--- );
+CREATE TABLE sucursal( 
+id_sucursal 			number(10) NOT NULL, 
+nombre_sucursal 		varchar2(75) NOT NULL, 
+monto_ahorrado 			number(10) NOT NULL,
+cantidad_ahorro         number (10) NOT NULL,
+ CONSTRAINT id_sucursal_pk    PRIMARY KEY (ID_sucursal));
 
 
 
@@ -98,13 +97,10 @@ CREATE SEQUENCE secuencia_ahorro
 CREATE OR REPLACE PROCEDURE insercion_tipo_ahorro(
 p_descripcion         IN     tipo_de_ahorro.descripcion%TYPE,
 p_tasa_interes         IN     tipo_de_ahorro.tasa_interes%TYPE) AS
-
 BEGIN
-
 INSERT INTO tipo_de_ahorro(id_tipo_ahorro,descripcion,tasa_interes)
 VALUES (secuencia_ahorro.nextval,p_descripcion,p_tasa_interes);
 END insercion_tipo_ahorro;
-
 /
 BEGIN 
 tipo_de_ahorro('Navidad','0.06');
@@ -118,7 +114,48 @@ BEGIN
 tipo_de_ahorro('Escolar','0.06');
 END;
 /
+CREATE SEQUENCE secuencia_sucursal
+	START WITH 1
+    INCREMENT BY 1;
+CREATE OR REPLACE PROCEDURE insercion_sucursal(
+p_nombre    	   IN sucursal.nombre_sucursal%TYPE) AS
+BEGIN
+INSERT INTO sucursal(id_sucursal,nombre_sucursal,monto_ahorrado,cantidad_ahorro)
+VALUES (secuencia_sucursal.nextval,p_nombre,0,0); 
+END insercion_sucursal;
+/
+BEGIN
+insercion_sucursal('Dorado');
+END;
+/
+BEGIN
+insercion_sucursal('Chepo');
+END;
+/
+BEGIN
+insercion_sucursal('Chorrera');
+END;
+/
 
+CREATE OR REPLACE PROCEDURE insercion_sucursal_ahorro(
+p_sucursal        IN    Sucursal_tipo_ahorro.id_sucursal%TYPE,
+p_tipo_ahorro     IN    Sucursal_tipo_ahorro.id_tipo_ahorro%TYPE) AS
+BEGIN
+INSERT INTO Sucursal_tipo_ahorro(id_sucursal,id_tipo_ahorro,monto_ahorrado,cantidad_tipo_ahorro)
+VALUES (p_sucursal,p_tipo_ahorro,0,0);
+END insercion_sucursal_ahorro;
+BEGIN
+insercion_sucursal_ahorro(1,2);
+END;
+/
+BEGIN
+insercion_sucursal_ahorro(2,3);
+END;
+/
+BEGIN
+insercion_sucursal_ahorro(3,1);
+END;
+/
 -------------------Procedimiento2Airlenys----------------------------
 
 CREATE OR REPLACE PROCEDURE insercion_ahorro(
@@ -232,7 +269,7 @@ BEGIN
         v_calculo_interes = calculo_interes (v_monto_transaccion,v_tasa_interes)
         IF (id_tipo_ahorro = 1 OR id_tipo_ahorro = 2) AND tipo_transaccion = 1 THEN
         	UPDATE ahorros
-        	SET saldo_ahorro = v_monto_transaccion + v_calculo_interes,
+        	SET saldo_ahorro = saldo_ahorro + v_monto_transaccion + v_calculo_interes,
         	    saldo_interes = v_monto_transaccion + v_calculo_interes,
         	WHERE id_cliente = v_id_cliente AND id_tipo_ahorro = v_id_tipo_ahorro AND id_sucursal = v_id_sucursal;
         ELSEIF id_tipo_ahorro = 3 THEN
