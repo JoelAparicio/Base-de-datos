@@ -26,8 +26,6 @@ ALTER TABLE sucursal ADD cantidad_ahorro number (10) NOT NULL;
 --     nombre_sucursal 		varchar2(75) NOT NULL, 
 --     monto_ahorrado 			number(10) NOT NULL,
 --     cantidad_ahorro         number (10) NOT NULL,
---     monto_prestamos         number(10) NOT NULL,
---     cantidad_prestamos      number (10) NOT NULL,
 --     CONSTRAINT id_sucursal_pk    PRIMARY KEY (ID_sucursal),
 -- );
 
