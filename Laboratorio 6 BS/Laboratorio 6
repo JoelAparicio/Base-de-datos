@@ -252,7 +252,7 @@ v_saldo_interes         ahorros.saldo_interes%TYPE,
 v_tasa_interes          ahorros.tasa_interes%TYPE,
 v_calculo_interes       tipo_de_ahorro.tasa_interes%TYPE,
 
-
+--FALTA ACTUALIZAR SUCURSAL Y SUCURSAL_TIPO_AHORRO EN ESTE PROCEDIMIENTO
 CURSOR c_actualizar IS
 SELECT id_sucursal, id_transaccion, id_cliente, id_tipo_ahorro, monto_transaccion, fecha_insersion, fecha_transaccion
 FROM transacciones
