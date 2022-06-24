@@ -62,7 +62,7 @@ CREATE SEQUENCE id_transaccion
 
 CREATE TABLE auditoria (
 id_transaccion      number (10) NOT NULL,
-Tabla               number (10) NOT NULL,
+Tabla               varchar2(100) NOT NULL,
 Tipo_operacion      char(1) NOT NULL,
 id_cliente          number (10) NOT NULL,
 id_tipo_ahorro      number (10) NOT NULL,
