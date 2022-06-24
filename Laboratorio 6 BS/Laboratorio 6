@@ -232,17 +232,25 @@ BEGIN
         FROM ahorros
         WHERE id_cliente = v_id_cliente AND id_tipo_ahorro = v_id_tipo_ahorro;
         v_calculo_interes = calculo_interes (v_monto_transaccion,v_tasa_interes)
-        IF id_tipo_ahorro = 1 OR id_tipo_ahorro = 2 AND tipo_transaccion = 1 THEN
+        IF (id_tipo_ahorro = 1 OR id_tipo_ahorro = 2) AND tipo_transaccion = 1 THEN
         	UPDATE ahorros
         	SET saldo_ahorro = v_monto_transaccion + v_calculo_interes,
         	    saldo_interes = v_monto_transaccion + v_calculo_interes,
         	WHERE id_cliente = v_id_cliente AND id_tipo_ahorro = v_id_tipo_ahorro AND id_sucursal = v_id_sucursal;
         ELSEIF id_tipo_ahorro = 3 THEN
-        	UPDATE ahorros
-        	SET saldo_ahorro = v_monto_transaccion
-        	WHERE id_cliente = v_id_cliente AND id_tipo_ahorro = v_id_tipo_ahorro AND id_sucursal = v_id_sucursal;
+        	IF tipo_transaccion = 1 THEN
+        		UPDATE ahorros
+        		SET saldo_ahorro = saldo_ahorro + v_monto_transaccion
+        		WHERE id_cliente = v_id_cliente AND id_tipo_ahorro = v_id_tipo_ahorro AND id_sucursal = v_id_sucursal;
+        	ELSE
+        		UPDATE ahorros
+        		SET saldo_ahorro = saldo_ahorro - v_monto_transaccion
+        		WHERE id_cliente = v_id_cliente AND id_tipo_ahorro = v_id_tipo_ahorro AND id_sucursal = v_id_sucursal;
         ELSE
-        	DBMS_OUTPUT.PUT_LINE("No puede realizar retiro de una cuenta escolar o navidad"); 
+        	DBMS_OUTPUT.PUT_LINE("No puede realizar retiro de una cuenta escolar o navidad");
+    UPDATE transacciones
+    SET STATUS = 'S'
+    WHERE id_cliente = v_id_cliente; 
     END LOOP;
     CLOSE c_actualizar;
 EXCEPTION
