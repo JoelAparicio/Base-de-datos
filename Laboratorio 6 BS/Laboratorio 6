@@ -169,21 +169,9 @@ p_saldo_del_ahorro       IN ahorros.saldo_del_ahorro%TYPE,
 p_control                IN char(1)) IS 
 
 BEGIN
-        IF p_control = A THEN
-        	UPDATE ahorros
-        	SET saldo_del_ahorro = saldo_del_ahorro + p_saldo_del_ahorro,
-        		fecha_de_deposito = sysdate,
-        		fecha_de_modificacion = sysdate
-        	WHERE numero_cuenta = p_numero_cuenta AND id_cliente = p_id_cliente;
-        	IF SQL%NOTFOUND THEN
-        		INSERT INTO ahorros (id_cliente, id_sucursal, id_tipo_ahorro, numero_cuenta, tasa_de_interes, letra_deposito_mensual, saldo_del_ahorro,saldo_del_interes, fecha_de_apertura, fecha_de_deposito,fecha_de_retiro,fecha_de_modificacion, usuario)
-	        	values (p_id_cliente, p_sucursal, p_tipo_ahorro, numero_cuenta.nextval, p_tasa_de_interes, p_letra_deposito_mensual, p_saldo_del_ahorro,0, sysdate, sysdate,null,sysdate, user);
-	    	END IF;
-
-    	ELSE
-			INSERT INTO ahorros (id_cliente, id_sucursal, id_tipo_ahorro, numero_cuenta, tasa_de_interes, letra_deposito_mensual, saldo_del_ahorro,saldo_del_interes, fecha_de_apertura, fecha_de_deposito,fecha_de_retiro,fecha_de_modificacion, usuario)
-	        values (p_id_cliente, p_sucursal, p_tipo_ahorro, numero_cuenta.nextval, p_tasa_de_interes, p_letra_deposito_mensual, p_saldo_del_ahorro,0, sysdate, sysdate,null,sysdate, user);
-	    END IF;
+    
+    INSERT INTO ahorros (id_cliente, id_sucursal, id_tipo_ahorro, numero_cuenta, tasa_de_interes, letra_deposito_mensual, saldo_del_ahorro,saldo_del_interes, fecha_de_apertura, fecha_de_deposito,fecha_de_retiro,fecha_de_modificacion, usuario)
+    values (p_id_cliente, p_sucursal, p_tipo_ahorro, numero_cuenta.nextval, p_tasa_de_interes, p_letra_deposito_mensual, p_saldo_del_ahorro,0, sysdate, sysdate,null,sysdate, user);
 
 EXCEPTION
     WHEN DUP_VAL_ON_INDEX THEN
@@ -193,7 +181,7 @@ END insercion_ahorro;
 /
 
 BEGIN
-insercion_ahorro (1,1,1,1,0.06,20,100,'A') 
+insercion_ahorro (1,1,1,1,0.06,20,100) 
 END;
 /
 
@@ -252,7 +240,7 @@ v_saldo_interes         ahorros.saldo_interes%TYPE,
 v_tasa_interes          ahorros.tasa_interes%TYPE,
 v_calculo_interes       tipo_de_ahorro.tasa_interes%TYPE,
 
---FALTA ACTUALIZAR SUCURSAL Y SUCURSAL_TIPO_AHORRO EN ESTE PROCEDIMIENTO
+
 CURSOR c_actualizar IS
 SELECT id_sucursal, id_transaccion, id_cliente, id_tipo_ahorro, monto_transaccion, fecha_insersion, fecha_transaccion
 FROM transacciones
@@ -292,5 +280,4 @@ EXCEPTION
     WHEN CURSOR_ALREADY_OPEN THEN
       DBMS_OUTPUT.PUT_LINE('CURSOR YA ABIERTO.');
 END actualizacion_pago;
-
 
