@@ -172,7 +172,6 @@ BEGIN
     
     INSERT INTO ahorros (id_cliente, id_sucursal, id_tipo_ahorro, numero_cuenta, tasa_de_interes, letra_deposito_mensual, saldo_del_ahorro,saldo_del_interes, fecha_de_apertura, fecha_de_deposito,fecha_de_retiro,fecha_de_modificacion, usuario)
     values (p_id_cliente, p_sucursal, p_tipo_ahorro, numero_cuenta.nextval, p_tasa_de_interes, p_letra_deposito_mensual, p_saldo_del_ahorro,0, sysdate, sysdate,null,sysdate, user);
-
 EXCEPTION
     WHEN DUP_VAL_ON_INDEX THEN
       DBMS_OUTPUT.PUT_LINE('INSERCION DUPLICADA.');
@@ -327,3 +326,76 @@ EXCEPTION
       DBMS_OUTPUT.PUT_LINE('CURSOR YA ABIERTO.');
 END actualizacion_pago;
 
+------------------Trigger1Joel----------------------------
+CREATE OR REPLACE TRIGGER actualizacion_sucursal
+AFTER UPDATE ON ahorros FOR EACH ROW
+DECLARE
+v_saldo_ahorro ahorros.saldo_ahorro%TYPE;
+v_id_sucursal  ahorros.id_sucursal%TYPE;
+BEGIN
+    SELECT saldo_ahorro,id_sucursal
+    INTO v_saldo_ahorro,v_id_sucursal
+    FROM ahorros;
+
+    UPDATE sucursal
+    SET monto_ahorrado = monto_ahorrado + v_saldo_ahorro,
+        cantidad_ahorro = cantidad_ahorro + 1
+    WHERE id_sucursal = v_id_sucursal;
+END actualizacion_sucursal;
+/
+------------------Trigger2Gabriela----------------------------
+------------------Trigger3Airlenys----------------------------
+------------------Procedimiento5Michael----------------------------
+CREATE OR REPLACE FUNCTION Calculo_interes (
+p_saldoact ahorros.saldo_del_ahorro%TYPE,
+p_interes ahorros.tasa_interes%TYPE)
+RETURN NUMBER IS
+v_tasatotal NUMBER;
+v_interes ahorros.tasa_interes%TYPE;
+BEGIN
+ v_interes:=(p_interes/100);
+ v_tasatotal:= p_saldoact*v_interes;
+RETURN v_tasatotal;
+END Calculo_interes;
+/
+
+CREATE OR REPLACE PROCEDURE intereses AS
+    v_id_cliente ahorros.id_cliente%TYPE, 
+    `v_id_sucursal ahorros.id_sucursal%TYPE,`
+    v_id_tipo_ahorro ahorros.id_tipo_ahorro%TYPE,
+    v_numero_cuenta ahorros.numero_cuenta%TYPE,
+    v_tasa_interes ahorros.tasa_interes%TYPE,
+    v_letra_deposito_mensual ahorros.letra_deposito_mensual%TYPE,
+    v_saldo_del_ahorro ahorros.saldo_del_ahorro%TYPE,
+    v_saldo_del_interes ahorros.saldo_del_interes%TYPE,
+    `v_fecha_de_apertura ahorros.fecha_de_apertura%TYPE,`
+    `v_fecha_de_deposito ahorros.fecha_de_deposito%TYPE,`
+    `v_fecha_de_retiro ahorros.fecha_de_retiro%TYPE,`
+    v_fecha_de_modificacion ahorros.fecha_de_modificacion%TYPE,
+    v_usuario ahorros.usuario%TYPE,
+
+    v_interestotal ahorros.tasa_interes%TYPE,
+    v_nuevo ahorros.saldo_del_ahorro%TYPE;
+
+CURSOR c_tipo_cuenta IS
+SELECT * IS
+FROM ahorros
+WHERE id_tipo_ahorro = 'Corriente';
+
+BEGIN
+OPEN c_tipo_cuenta;
+LOOP
+    FETCH c_tipo_cuenta INTO v_id_cliente, v_id_tipo_ahorro, v_numero_cuenta, v_tasa_interes, v_letra_deposito_mensual, v_saldo_del_ahorro, v_saldo_del_interes
+    v_fecha_de_modificacion, v_usuario, v_interestotal, v_nuevo;
+    EXIT WHEN c_tipo_cuenta%NOTFOUND;
+END LOOP;
+
+ v_interestotal:= Calculo_interes(v_saldo_del_ahorro,v_tasa_interes);
+ v_nuevo:= v_interestotal + v_saldo_del_ahorro; 
+
+UPDATE ahorro SET tasa_interes = v_interestotal WHERE id_tipo_ahorro = v_id_tipo_ahorro;
+UPDATE ahorro SET saldo_del_ahorro = v_nuevo WHERE id_tipo_ahorro = v_id_tipo_ahorro;
+
+CLOSE c_tipo_cuenta;
+COMMIT;
+END intereses;
