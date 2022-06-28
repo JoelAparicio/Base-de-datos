@@ -1,38 +1,51 @@
+SET SERVEROUTPUT ON
+CREATE TABLE tipo_correo(
+    tipo_correoID   number (10),
+    descripcion     varchar2 (75) not null,
+    CONSTRAINT tipo_correoID_pk PRIMARY KEY (tipo_correoID));
+
+CREATE TABLE tipo_telefono(
+    telefonoID      number (10),
+    descripcion     varchar2 (50) not null,
+    CONSTRAINT telefonoID_pk PRIMARY KEY (telefonoID));
+
 CREATE TABLE tipo_de_ahorro(
     id_tipo_ahorro 			number (10) NOT NULL,
     descripcion 			varchar2 (200) NOT NULL,
     tasa_interes 			number (10) NOT NULL,
     CONSTRAINT id_tipo_ahorro_pk PRIMARY KEY (ID_tipo_ahorro));
 
-CREATE TABLE Sucursal_tipo_ahorro(
-    id_sucursal         number(10),
-    id_tipo_ahorro      number (10),
-    monto_ahorrado      number(10) NOT NULL,
-    cantidad_tipo_ahorro     number (10) NOT NULL, 
-    CONSTRAINT id_sucursal_ahorro_pk PRIMARY KEY (id_sucursal,id_tipo_ahorro),
-    CONSTRAINT id_sucursal_fk FOREIGN KEY (id_sucursal) REFERENCES sucursal(id_sucursal),
-    CONSTRAINT id_tipo_ahorro_fk FOREIGN KEY (id_tipo_ahorro) REFERENCES tipo_de_ahorro(id_tipo_ahorro)
-    
-);
+CREATE TABLE profesion(
+    id_profesion    number(10),
+    profesion       VARCHAR2(150) NOT NULL,
+    CONSTRAINT id_profesion PRIMARY KEY (id_profesion));
 
+CREATE TABLE cliente(
+    id_cliente      number(10),
+    cedula          varchar2(12) not null,
+    nombre          varchar2(25) not null,
+    apellido        varchar2(25) not null,
+    sexo            char not null,
+    id_profesion    number (10),
+    fecha_nacimiento date,
+    CONSTRAINT id_cliente PRIMARY KEY (id_cliente),
+    CONSTRAINT fk_id_profesion FOREIGN KEY (id_profesion) REFERENCES profesion(id_profesion));
 
-ALTER TABLE sucursal ADD monto_ahorrado number (10) NOT NULL;
-ALTER TABLE sucursal ADD cantidad_ahorro number (10) NOT NULL;
+CREATE TABLE correo(
+    id_cliente number(10),
+    tipo_correoID number (10),
+    correo VARCHAR2(100) not null,
+    CONSTRAINT id_cliente_tipo_correo_pk PRIMARY KEY (id_cliente,tipo_correoID),
+    CONSTRAINT id_cliente_correo_fk FOREIGN KEY (id_cliente) REFERENCES cliente(id_cliente),
+    CONSTRAINT tipo_correoID_fk FOREIGN KEY (tipo_correoID) REFERENCES tipo_correo(tipo_correoID));
 
-
--- Solución más rapida borrar tabla y volver a crearla
-CREATE TABLE sucursal( 
-id_sucursal 			number(10) NOT NULL, 
-nombre_sucursal 		varchar2(75) NOT NULL, 
-monto_ahorrado 			number(10) NOT NULL,
-cantidad_ahorro         number (10) NOT NULL,
- CONSTRAINT id_sucursal_pk    PRIMARY KEY (ID_sucursal));
-
-
-
-CREATE SEQUENCE numero_cuenta
-    START WITH 1
-    INCREMENT BY 1;
+CREATE TABLE telefono(
+    id_cliente number(10),
+    telefonoID number (10),
+    telefono varchar (9) not null,
+    CONSTRAINT id_cliente_telefonoID_pk PRIMARY KEY (id_cliente,telefonoID),
+    CONSTRAINT id_cliente_telefono_fk FOREIGN KEY (id_cliente) REFERENCES cliente(id_cliente),
+    CONSTRAINT telefonoID_fk FOREIGN KEY (telefonoID) REFERENCES tipo_telefono(telefonoID));
 
 CREATE TABLE ahorros(
     id_cliente NUMBER(10) NOT NULL, 
@@ -48,31 +61,51 @@ CREATE TABLE ahorros(
     fecha_de_retiro DATE,
     fecha_de_modificacion DATE,
     usuario VARCHAR(15) NOT NULL,
-
     CONSTRAINT numero_cuenta_pk PRIMARY KEY (numero_cuenta), 
     CONSTRAINT id_tipo_ahorro_fk1 FOREIGN KEY (id_tipo_ahorro) REFERENCES tipo_de_ahorro(id_tipo_ahorro),
     CONSTRAINT id_sucursal_fk FOREIGN KEY (id_sucursal) REFERENCES sucursal(id_sucursal));
 
-CREATE SEQUENCE id_transaccion 
-    START WITH 1
-    INCREMENT BY 1;
+ALTER TABLE cliente ADD edad number(3) not null;
+
+
+CREATE TABLE sucursal( 
+    id_sucursal 			number(10) NOT NULL, 
+    nombre_sucursal 		varchar2(75) NOT NULL, 
+    monto_ahorrado 			number(10) NOT NULL,
+    cantidad_ahorro         number (10) NOT NULL,
+    CONSTRAINT id_sucursal_pk    PRIMARY KEY (ID_sucursal));
+
+CREATE TABLE Sucursal_tipo_ahorro(
+    id_sucursal         number(10),
+    id_tipo_ahorro      number (10),
+    monto_ahorrado      number(10) NOT NULL,
+    cantidad_tipo_ahorro     number (10) NOT NULL, 
+    CONSTRAINT id_sucursal_ahorro_pk PRIMARY KEY (id_sucursal,id_tipo_ahorro),
+    CONSTRAINT id_sucursal_fk FOREIGN KEY (id_sucursal) REFERENCES sucursal(id_sucursal),
+    CONSTRAINT id_tipo_ahorro_fk FOREIGN KEY (id_tipo_ahorro) REFERENCES tipo_de_ahorro(id_tipo_ahorro));
+
+ALTER TABLE cliente ADD id_sucursal number(10) NOT NULL; 
+ALTER TABLE cliente ADD CONSTRAINT fk_id_sucursal_cliente FOREIGN KEY (id_sucursal) REFERENCES sucursal(id_sucursal); 
+
+ALTER TABLE ahorros ADD id_sucursal number(10) NOT NULL; 
+ALTER TABLE ahorros ADD CONSTRAINT fk_id_sucursalprestamo FOREIGN KEY (id_sucursal) REFERENCES sucursal(id_sucursal); 
 
 CREATE TABLE auditoria (
-id_transaccion      number (10) NOT NULL,
-Tabla               varchar2(100) NOT NULL,
-Tipo_operacion      char(1) NOT NULL,
-id_cliente          number (10) NOT NULL,
-id_tipo_ahorro      number (10) NOT NULL,
-tipo_transaccion    number (1) NOT NULL,
-Saldo_Anterior      number(10) NOT NULL,
-monto_deposito      number (10) NOT NULL,
-Saldo_Final         number(10) NOT NULL,
-usuario             varchar2 (50) NOT NULL,
-fecha               date NOT NULL,
+    id_transaccion      number (10) NOT NULL,
+    Tabla               varchar2(100) NOT NULL,
+    Tipo_operacion      char(1) NOT NULL,
+    id_cliente          number (10) NOT NULL,
+    id_tipo_ahorro      number (10) NOT NULL,
+    tipo_transaccion    number (1) NOT NULL,
+    Saldo_Anterior      number(10) NOT NULL,
+    monto_deposito      number (10) NOT NULL,
+    Saldo_Final         number(10) NOT NULL,
+    usuario             varchar2 (50) NOT NULL,
+    fecha               date NOT NULL,
 
-CONSTRAINT PK_id_transaccion2 PRIMARY KEY (id_transaccion),
-CONSTRAINT FK_id_cliente2 FOREIGN KEY (id_cliente) REFERENCES ahorros(id_cliente),
-CONSTRAINT FK_id_tipo_ahorro3 FOREIGN KEY (id_tipo_ahorro) REFERENCES tipo_de_ahorro(id_tipo_ahorro));
+    CONSTRAINT PK_id_transaccion2 PRIMARY KEY (id_transaccion),
+    CONSTRAINT FK_id_cliente2 FOREIGN KEY (id_cliente) REFERENCES ahorros(id_cliente),
+    CONSTRAINT FK_id_tipo_ahorro3 FOREIGN KEY (id_tipo_ahorro) REFERENCES tipo_de_ahorro(id_tipo_ahorro));
 
 CREATE TABLE transacciones(
 	id_sucursal    			number (10)     NOT NULL,
@@ -90,175 +123,205 @@ CREATE TABLE transacciones(
 	CONSTRAINT id_tipo_ahorro_fk2 FOREIGN KEY (id_tipo_ahorro) REFERENCES tipo_de_ahorro(id_tipo_ahorro),
 	CONSTRAINT id_sucursal_fk2    FOREIGN KEY (id_sucursal) REFERENCES sucursal(id_sucursal));
 
-CREATE SEQUENCE secuencia_ahorro
-    START WITH 1
-    INCREMENT BY 1;
 ------------------Procedimiento1Gabriela----------------------------
 CREATE OR REPLACE PROCEDURE insercion_tipo_ahorro(
-p_descripcion         IN     tipo_de_ahorro.descripcion%TYPE,
-p_tasa_interes         IN     tipo_de_ahorro.tasa_interes%TYPE) AS
-BEGIN
-INSERT INTO tipo_de_ahorro(id_tipo_ahorro,descripcion,tasa_interes)
-VALUES (secuencia_ahorro.nextval,p_descripcion,p_tasa_interes);
-END insercion_tipo_ahorro;
+    p_descripcion         IN     tipo_de_ahorro.descripcion%TYPE,
+    p_tasa_interes         IN     tipo_de_ahorro.tasa_interes%TYPE) AS
+    BEGIN
+    INSERT INTO tipo_de_ahorro(id_tipo_ahorro,descripcion,tasa_interes)
+    VALUES (secuencia_ahorro.nextval,p_descripcion,p_tasa_interes);
+    END insercion_tipo_ahorro;
 /
+
+
 BEGIN 
-tipo_de_ahorro('Navidad','0.06');
+    tipo_de_ahorro('Navidad','0.06');
 END;
 /
+
+
 BEGIN 
-tipo_de_ahorro('Corriente','0.04');
+    tipo_de_ahorro('Corriente','0.04');
 END;
 /
+
+
 BEGIN 
-tipo_de_ahorro('Escolar','0.06');
+    tipo_de_ahorro('Escolar','0.06');
 END;
 /
+
+
 CREATE SEQUENCE secuencia_sucursal
 	START WITH 1
     INCREMENT BY 1;
+
 CREATE OR REPLACE PROCEDURE insercion_sucursal(
-p_nombre    	   IN sucursal.nombre_sucursal%TYPE) AS
-BEGIN
-INSERT INTO sucursal(id_sucursal,nombre_sucursal,monto_ahorrado,cantidad_ahorro)
-VALUES (secuencia_sucursal.nextval,p_nombre,0,0); 
-END insercion_sucursal;
+    p_nombre    	   IN sucursal.nombre_sucursal%TYPE) AS
+    BEGIN
+    INSERT INTO sucursal(id_sucursal,nombre_sucursal,monto_ahorrado,cantidad_ahorro)
+    VALUES (secuencia_sucursal.nextval,p_nombre,0,0); 
+    END insercion_sucursal;
 /
+
+
 BEGIN
-insercion_sucursal('Dorado');
-END;
-/
-BEGIN
-insercion_sucursal('Chepo');
-END;
-/
-BEGIN
-insercion_sucursal('Chorrera');
+    insercion_sucursal('Dorado');
 END;
 /
 
+
+BEGIN
+    insercion_sucursal('Chepo');
+END;
+/
+
+
+BEGIN
+    insercion_sucursal('Chorrera');
+END;
+/
+
+
+
 CREATE OR REPLACE PROCEDURE insercion_sucursal_ahorro(
-p_sucursal        IN    Sucursal_tipo_ahorro.id_sucursal%TYPE,
-p_tipo_ahorro     IN    Sucursal_tipo_ahorro.id_tipo_ahorro%TYPE) AS
-BEGIN
-INSERT INTO Sucursal_tipo_ahorro(id_sucursal,id_tipo_ahorro,monto_ahorrado,cantidad_tipo_ahorro)
-VALUES (p_sucursal,p_tipo_ahorro,0,0);
+    p_sucursal        IN    Sucursal_tipo_ahorro.id_sucursal%TYPE,
+    p_tipo_ahorro     IN    Sucursal_tipo_ahorro.id_tipo_ahorro%TYPE) AS
+    BEGIN
+        INSERT INTO Sucursal_tipo_ahorro(id_sucursal,id_tipo_ahorro,monto_ahorrado,cantidad_tipo_ahorro)
+        VALUES (p_sucursal,p_tipo_ahorro,0,0);
 END insercion_sucursal_ahorro;
+/
+
+
 BEGIN
-insercion_sucursal_ahorro(1,2);
+    insercion_sucursal_ahorro(1,2);
 END;
 /
+
+
 BEGIN
-insercion_sucursal_ahorro(2,3);
+    insercion_sucursal_ahorro(2,3);
 END;
 /
+
+
 BEGIN
-insercion_sucursal_ahorro(3,1);
+    insercion_sucursal_ahorro(3,1);
 END;
 /
+
+
 -------------------Procedimiento2Airlenys----------------------------
 
 CREATE OR REPLACE PROCEDURE insercion_ahorro(
-p_id_cliente             IN ahorros.id_cliente%TYPE,
-p_sucursal               IN ahorros.id_sucursal%TYPE,
-p_tipo_ahorro            IN ahorros.id_tipo_ahorro%TYPE,
-p_numero_cuenta          IN ahorros.numero_cuenta%TYPE,
-p_tasa_de_interes        IN ahorros.tasa_de_interes%TYPE,
-p_letra_deposito_mensual IN ahorros.letra_deposito_mensual%TYPE,
+    p_id_cliente             IN ahorros.id_cliente%TYPE,
+    p_sucursal               IN ahorros.id_sucursal%TYPE,
+    p_tipo_ahorro            IN ahorros.id_tipo_ahorro%TYPE,
+    p_numero_cuenta          IN ahorros.numero_cuenta%TYPE,
+    p_tasa_de_interes        IN ahorros.tasa_de_interes%TYPE,
+    p_letra_deposito_mensual IN ahorros.letra_deposito_mensual%TYPE,
 
 
-BEGIN
+    BEGIN
+        INSERT INTO ahorros (id_cliente, id_sucursal, id_tipo_ahorro, numero_cuenta, tasa_de_interes, letra_deposito_mensual, saldo_del_ahorro,saldo_del_interes, fecha_de_apertura, fecha_de_deposito,fecha_de_retiro,fecha_de_modificacion, usuario)
+        values (p_id_cliente, p_sucursal, p_tipo_ahorro, numero_cuenta.nextval, p_tasa_de_interes, p_letra_deposito_mensual, 0,0, sysdate, sysdate,null,sysdate, user);
     
-    INSERT INTO ahorros (id_cliente, id_sucursal, id_tipo_ahorro, numero_cuenta, tasa_de_interes, letra_deposito_mensual, saldo_del_ahorro,saldo_del_interes, fecha_de_apertura, fecha_de_deposito,fecha_de_retiro,fecha_de_modificacion, usuario)
-    values (p_id_cliente, p_sucursal, p_tipo_ahorro, numero_cuenta.nextval, p_tasa_de_interes, p_letra_deposito_mensual, 0,0, sysdate, sysdate,null,sysdate, user);
-EXCEPTION
-    WHEN DUP_VAL_ON_INDEX THEN
-      DBMS_OUTPUT.PUT_LINE('INSERCION DUPLICADA.');
+    EXCEPTION
+        WHEN DUP_VAL_ON_INDEX THEN
+        DBMS_OUTPUT.PUT_LINE('INSERCION DUPLICADA.');
 
 END insercion_ahorro;
 /
 
 BEGIN
-insercion_ahorro (1,1,1,0.06,20) 
+    insercion_ahorro (1,1,1,0.06,20) 
 END;
 /
 
 BEGIN
-insercion_ahorro (2,1,1,0.06,50) 
+    insercion_ahorro (2,1,1,0.06,50) 
 END;
 /
 
 BEGIN
-insercion_ahorro (3,1,1,0.06,10) 
+    insercion_ahorro (3,1,1,0.06,10) 
 END;
 /
 
 BEGIN
-insercion_ahorro (1,1,2,0.06,5) 
+    insercion_ahorro (1,1,2,0.06,5) 
 END;
 /
 
 BEGIN
-insercion_ahorro (1,3,3,0.06,5) 
+    insercion_ahorro (1,3,3,0.06,5) 
 END;
 /
 
 BEGIN
-insercion_ahorro (2,3,2,0.06,100) 
+    insercion_ahorro (2,3,2,0.06,100) 
 END;
 /
 
 BEGIN
-insercion_ahorro (3,2,3,0.06,20) 
+    insercion_ahorro (3,2,3,0.06,20) 
 END;
 /
 
 BEGIN
-insercion_ahorro (3,2,2,0.06,15) 
+    insercion_ahorro (3,2,2,0.06,15) 
 END;
 /
 
 BEGIN
-insercion_ahorro (4,1,2,0.06,20) 
+    insercion_ahorro (4,1,2,0.06,20) 
 END;
 /
 
 BEGIN
-insercion_ahorro (4,2,3,0.06,5) 
+    insercion_ahorro (4,2,3,0.06,5) 
 END;
 /
 
 
 
 ------------------Procedimiento3MiChael----------------------------
+
+
 CREATE SEQUENCE secuencia_transaccion
     START WITH 1
     INCREMENT BY 1;
 
 CREATE OR REPLACE PROCEDURE registro_transaccion(
-p_id_sucursal    transacciones.id_sucursal%TYPE,
-p_id_cliente   transacciones.id_cliente%TYPE,
-p_id_tipo_ahorro   transacciones.id_tipo_ahorro%TYPE,
-p_tipo_transaccion  transacciones.tipo_transaccion%TYPE,
-p_monto_transaccion    transacciones.monto_transaccion%TYPE) AS
+    p_id_sucursal    transacciones.id_sucursal%TYPE,
+    p_id_cliente   transacciones.id_cliente%TYPE,
+    p_id_tipo_ahorro   transacciones.id_tipo_ahorro%TYPE,
+    p_tipo_transaccion  transacciones.tipo_transaccion%TYPE,
+    p_monto_transaccion    transacciones.monto_transaccion%TYPE) AS
 
-BEGIN
-INSERT INTO transacciones(id_sucursal,id_transaccion,id_cliente,id_tipo_ahorro,fecha_transaccion,tipo_transaccion,monto_transaccion,status,fecha_insersion,usuario)
-VALUES (p_id_sucursal,secuencia_transaccion.nextval,p_id_cliente,p_id_tipo_ahorro,sysdate,p_tipo_transaccion,p_monto_transaccion,'N',sysdate,user);
+    BEGIN
+        INSERT INTO transacciones(id_sucursal,id_transaccion,id_cliente,id_tipo_ahorro,fecha_transaccion,tipo_transaccion,monto_transaccion,status,fecha_insersion,usuario)
+        VALUES (p_id_sucursal,secuencia_transaccion.nextval,p_id_cliente,p_id_tipo_ahorro,sysdate,p_tipo_transaccion,p_monto_transaccion,'N',sysdate,user);
 END registro_transaccion;
 /
+
 BEGIN
-registro(1, 1, 2, 2, 175.00);
-/
+    registro(1, 1, 2, 2, 175.00);
 END;
+/
+
+
 BEGIN
-registro(2, 3, 1, 1, 74.00);
-/
+    registro(2, 3, 1, 1, 74.00);
 END;
+/
+
+
 BEGIN
-registro(2, 2, 3, 2, 95.00);
-/
+    registro(2, 2, 3, 2, 95.00);
 END;
+/
 
 
 
@@ -272,123 +335,129 @@ BEGIN
 END calculo_interes;
 
 CREATE OR REPLACE PROCEDURE actualizacion_pago AS
-v_id_sucursal       	transacciones.id_sucursal%TYPE,
-v_id_transaccion    	transacciones.id_transaccion%TYPE,
-v_id_cliente        	transacciones.id_cliente%TYPE,
-v_id_tipo_ahorro    	transacciones.id_tipo_ahorro%TYPE,
-v_monto_transaccion  	transacciones.monto_transaccion%TYPE,
-v_fecha_insersion       transacciones.fecha_insersion%TYPE,
-v_fecha_transaccion     transacciones.fecha_transaccion%TYPE,
-v_saldo_ahorro          ahorros.saldo_ahorro%TYPE,
-v_saldo_interes         ahorros.saldo_interes%TYPE,
-v_tasa_interes          ahorros.tasa_interes%TYPE,
-v_calculo_interes       tipo_de_ahorro.tasa_interes%TYPE,
+    v_id_sucursal       	transacciones.id_sucursal%TYPE,
+    v_id_transaccion    	transacciones.id_transaccion%TYPE,
+    v_id_cliente        	transacciones.id_cliente%TYPE,
+    v_id_tipo_ahorro    	transacciones.id_tipo_ahorro%TYPE,
+    v_monto_transaccion  	transacciones.monto_transaccion%TYPE,
+    v_fecha_insersion       transacciones.fecha_insersion%TYPE,
+    v_fecha_transaccion     transacciones.fecha_transaccion%TYPE,
+    v_saldo_ahorro          ahorros.saldo_ahorro%TYPE,
+    v_saldo_interes         ahorros.saldo_interes%TYPE,
+    v_tasa_interes          ahorros.tasa_interes%TYPE,
+    v_calculo_interes       tipo_de_ahorro.tasa_interes%TYPE,
 
 
-CURSOR c_actualizar IS
-SELECT id_sucursal, id_transaccion, id_cliente, id_tipo_ahorro, monto_transaccion, fecha_insersion, fecha_transaccion
-FROM transacciones
-WHERE STATUS = 'N' AND (tipo_transaccion = 1 OR tipo_transaccion = 2);
-BEGIN
-    OPEN c_actualizar;
-    LOOP
-        FETCH c_actualizar INTO v_id_sucursal, v_id_transaccion, v_id_cliente, v_id_tipo_ahorro, v_monto_transaccion, v_fecha_insersion, v_fecha_transaccion;
-        EXIT WHEN c_actualizar%NOTFOUND;
-        SELECT saldo_ahorro, saldo_interes,tasa_interes
-        INTO   v_saldo_ahorro,v_saldo_interes,v_tasa_interes
-        FROM ahorros
-        WHERE id_cliente = v_id_cliente AND id_tipo_ahorro = v_id_tipo_ahorro;
-        v_calculo_interes = calculo_interes (v_monto_transaccion,v_tasa_interes)
-        IF (id_tipo_ahorro = 1 OR id_tipo_ahorro = 2) AND tipo_transaccion = 1 THEN
-        	UPDATE ahorros
-        	SET saldo_ahorro = saldo_ahorro + v_monto_transaccion + v_calculo_interes,
-        	    saldo_interes = v_monto_transaccion + v_calculo_interes,
-        	WHERE id_cliente = v_id_cliente AND id_tipo_ahorro = v_id_tipo_ahorro;
-        ELSEIF id_tipo_ahorro = 3 THEN
-        	IF tipo_transaccion = 1 THEN
-        		UPDATE ahorros
-        		SET saldo_ahorro = saldo_ahorro + v_monto_transaccion
-        		WHERE id_cliente = v_id_cliente AND id_tipo_ahorro = v_id_tipo_ahorro;
-        	ELSE
-        		UPDATE ahorros
-        		SET saldo_ahorro = saldo_ahorro - v_monto_transaccion
-        		WHERE id_cliente = v_id_cliente AND id_tipo_ahorro = v_id_tipo_ahorro;
-        ELSE
-        	DBMS_OUTPUT.PUT_LINE("No puede realizar retiro de una cuenta escolar o navidad");
-    UPDATE transacciones
-    SET STATUS = 'S'
-    WHERE id_cliente = v_id_cliente; 
-    END LOOP;
-    CLOSE c_actualizar;
-EXCEPTION
-    WHEN CURSOR_ALREADY_OPEN THEN
-      DBMS_OUTPUT.PUT_LINE('CURSOR YA ABIERTO.');
+    CURSOR c_actualizar IS
+    SELECT id_sucursal, id_transaccion, id_cliente, id_tipo_ahorro, monto_transaccion, fecha_insersion, fecha_transaccion
+    FROM transacciones
+    WHERE STATUS = 'N' AND (tipo_transaccion = 1 OR tipo_transaccion = 2);
+    BEGIN
+        OPEN c_actualizar;
+        LOOP
+            FETCH c_actualizar INTO v_id_sucursal, v_id_transaccion, v_id_cliente, v_id_tipo_ahorro, v_monto_transaccion, v_fecha_insersion, v_fecha_transaccion;
+            EXIT WHEN c_actualizar%NOTFOUND;
+            
+            SELECT saldo_ahorro, saldo_interes,tasa_interes
+            INTO   v_saldo_ahorro,v_saldo_interes,v_tasa_interes
+            FROM ahorros
+            WHERE id_cliente = v_id_cliente AND id_tipo_ahorro = v_id_tipo_ahorro;
+            v_calculo_interes = calculo_interes (v_monto_transaccion,v_tasa_interes)
+            
+            IF (id_tipo_ahorro = 1 OR id_tipo_ahorro = 2) AND tipo_transaccion = 1 THEN
+                UPDATE ahorros
+                SET saldo_ahorro = saldo_ahorro + v_monto_transaccion + v_calculo_interes,
+                    saldo_interes = v_monto_transaccion + v_calculo_interes,
+                WHERE id_cliente = v_id_cliente AND id_tipo_ahorro = v_id_tipo_ahorro;
+            
+            ELSEIF id_tipo_ahorro = 3 THEN
+                IF tipo_transaccion = 1 THEN
+                    UPDATE ahorros
+                    SET saldo_ahorro = saldo_ahorro + v_monto_transaccion
+                    WHERE id_cliente = v_id_cliente AND id_tipo_ahorro = v_id_tipo_ahorro;
+                ELSE
+                    UPDATE ahorros
+                    SET saldo_ahorro = saldo_ahorro - v_monto_transaccion
+                    WHERE id_cliente = v_id_cliente AND id_tipo_ahorro = v_id_tipo_ahorro;
+            ELSE
+                DBMS_OUTPUT.PUT_LINE("No puede realizar retiro de una cuenta escolar o navidad");
+        UPDATE transacciones
+        SET STATUS = 'S'
+        WHERE id_cliente = v_id_cliente; 
+        END LOOP;
+        CLOSE c_actualizar;
+    EXCEPTION
+        WHEN CURSOR_ALREADY_OPEN THEN
+        DBMS_OUTPUT.PUT_LINE('CURSOR YA ABIERTO.');
 END actualizacion_pago;
+/
+
 
 ------------------Trigger1Joel----------------------------
 CREATE OR REPLACE TRIGGER actualizacion_sucursal
 AFTER UPDATE ON ahorros FOR EACH ROW
-DECLARE
-v_saldo_ahorro ahorros.saldo_ahorro%TYPE;
-v_id_sucursal  ahorros.id_sucursal%TYPE;
-BEGIN
-    SELECT saldo_ahorro,id_sucursal
-    INTO v_saldo_ahorro,v_id_sucursal
-    FROM ahorros;
+    DECLARE
+    v_saldo_ahorro ahorros.saldo_ahorro%TYPE;
+    v_id_sucursal  ahorros.id_sucursal%TYPE;
+    BEGIN
+        SELECT saldo_ahorro,id_sucursal
+        INTO v_saldo_ahorro,v_id_sucursal
+        FROM ahorros;
 
-    UPDATE sucursal
-    SET monto_ahorrado = monto_ahorrado + v_saldo_ahorro,
-        cantidad_ahorro = cantidad_ahorro + 1
-    WHERE id_sucursal = v_id_sucursal;
+        UPDATE sucursal
+        SET monto_ahorrado = monto_ahorrado + v_saldo_ahorro,
+            cantidad_ahorro = cantidad_ahorro + 1
+        WHERE id_sucursal = v_id_sucursal;
 END actualizacion_sucursal;
 /
 ------------------Trigger2Gabriela----------------------------
 CREATE OR REPLACE TRIGGER actualizacion__sucursal_tipo_ahorro
 AFTER UPDATE ON ahorros FOR EACH ROW
-DECLARE
-v_id_tipo_ahorro     ahorros.id_tipo_ahorro%TYPE;
-v_saldo_ahorro       ahorros.saldo_ahorro%TYPE;
+    DECLARE
+    v_id_tipo_ahorro     ahorros.id_tipo_ahorro%TYPE;
+    v_saldo_ahorro       ahorros.saldo_ahorro%TYPE;
 
-BEGIN
-    SELECT  id_tipo_ahorro, saldo_ahorro 
-    INTO  v_id_tipo_ahorro, v_saldo_ahorro 
-    FROM ahorros ;
+    BEGIN
+        SELECT  id_tipo_ahorro, saldo_ahorro 
+        INTO  v_id_tipo_ahorro, v_saldo_ahorro 
+        FROM ahorros ;
 
-    UPDATE Sucursal_tipo_ahorro
-    SET monto_ahorrado = monto_ahorrado + v_saldo_ahorro,
-        cantidad_tipo_ahorro = cantidad_tipo_ahorro + 1
-    WHERE id_tipo_ahorro = v_id_tipo_ahorro;
+        UPDATE Sucursal_tipo_ahorro
+        SET monto_ahorrado = monto_ahorrado + v_saldo_ahorro,
+            cantidad_tipo_ahorro = cantidad_tipo_ahorro + 1
+        WHERE id_tipo_ahorro = v_id_tipo_ahorro;
 END actualizacion__sucursal_tipo_ahorro;
 /
+
 ------------------Trigger3Airlenys----------------------------
 CREATE OR REPLACE TRIGGER carga_auditoria
 AFTER UPDATE OR INSERT OR DELETE ON transacciones FOR EACH ROW
 
-DECLARE
-v_id_cliente        	transacciones.id_cliente%TYPE,
-v_id_tipo_ahorro    	transacciones.id_tipo_ahorro%TYPE,
-v_tipo_transaccion      transacciones.tipo_transaccion%TYPE,
-v_monto_transaccion  	transacciones.monto_transaccion%TYPE,
-v_saldo_del_ahorro      ahorros.saldo_ahorro%TYPE,
+    DECLARE
+    v_id_cliente        	transacciones.id_cliente%TYPE,
+    v_id_tipo_ahorro    	transacciones.id_tipo_ahorro%TYPE,
+    v_tipo_transaccion      transacciones.tipo_transaccion%TYPE,
+    v_monto_transaccion  	transacciones.monto_transaccion%TYPE,
+    v_saldo_del_ahorro      ahorros.saldo_ahorro%TYPE,
 
-BEGIN
+    BEGIN
 
-    SELECT t.id_cliente, t.id_tipo_ahorro, t.tipo_transaccion, t.monto_transaccion, a.saldo_ahorro
-    INTO v_id_cliente,v_id_tipo_ahorro,v_tipo_transaccion,v_monto_transaccion, v_saldo_del_ahorro
-    FROM transacciones t AND ahorros a;
+        SELECT t.id_cliente, t.id_tipo_ahorro, t.tipo_transaccion, t.monto_transaccion, a.saldo_ahorro
+        INTO v_id_cliente,v_id_tipo_ahorro,v_tipo_transaccion,v_monto_transaccion, v_saldo_del_ahorro
+        FROM transacciones t AND ahorros a;
 
-    IF INSERTING THEN
-        INSERT INTO auditoria (id_transaccion, Tabla, Tipo_operacion, id_cliente, id_tipo_ahorro, tipo_transaccion, Saldo_Anterior, monto_deposito, Saldo_Final, usuario, fecha) 
-        VALUES (secuencia_auditoria.nextval , 'transacciones','I', V_id_cliente, v_id_tipo_ahorro, v_tipo_transaccion, :0ld.v_saldo_del_ahorro, v_monto_transaccion, :new.v_saldo_del_ahorro, user, sysdate);
-    
-    ELSIF UPDATING THEN
-        INSERT INTO auditoria (id_transaccion, Tabla, Tipo_operacion, id_cliente, id_tipo_ahorro, tipo_transaccion, Saldo_Anterior, monto_deposito, Saldo_Final, usuario, fecha) 
-        VALUES (secuencia_auditoria.nextval , 'transacciones','U', V_id_cliente, v_id_tipo_ahorro, v_tipo_transaccion,  :0ld.v_saldo_del_ahorro, v_monto_transaccion, :new.v_saldo_del_ahorro, user, sysdate);
-    
-    ELSIF DELETING THEN
-        INSERT INTO auditoria (id_transaccion, Tabla, Tipo_operacion, id_cliente, id_tipo_ahorro, tipo_transaccion, Saldo_Anterior, monto_deposito, Saldo_Final, usuario, fecha) 
-        VALUES (secuencia_auditoria.nextval , 'transacciones','D', V_id_cliente, v_id_tipo_ahorro, v_tipo_transaccion, :0ld.v_saldo_del_ahorro, v_monto_transaccion, :new.v_saldo_del_ahorro, user, sysdate);
-    END IF;
+        IF INSERTING THEN
+            INSERT INTO auditoria (id_transaccion, Tabla, Tipo_operacion, id_cliente, id_tipo_ahorro, tipo_transaccion, Saldo_Anterior, monto_deposito, Saldo_Final, usuario, fecha) 
+            VALUES (secuencia_auditoria.nextval , 'transacciones','I', V_id_cliente, v_id_tipo_ahorro, v_tipo_transaccion, :0ld.v_saldo_del_ahorro, v_monto_transaccion, :new.v_saldo_del_ahorro, user, sysdate);
+        
+        ELSIF UPDATING THEN
+            INSERT INTO auditoria (id_transaccion, Tabla, Tipo_operacion, id_cliente, id_tipo_ahorro, tipo_transaccion, Saldo_Anterior, monto_deposito, Saldo_Final, usuario, fecha) 
+            VALUES (secuencia_auditoria.nextval , 'transacciones','U', V_id_cliente, v_id_tipo_ahorro, v_tipo_transaccion,  :0ld.v_saldo_del_ahorro, v_monto_transaccion, :new.v_saldo_del_ahorro, user, sysdate);
+        
+        ELSIF DELETING THEN
+            INSERT INTO auditoria (id_transaccion, Tabla, Tipo_operacion, id_cliente, id_tipo_ahorro, tipo_transaccion, Saldo_Anterior, monto_deposito, Saldo_Final, usuario, fecha) 
+            VALUES (secuencia_auditoria.nextval , 'transacciones','D', V_id_cliente, v_id_tipo_ahorro, v_tipo_transaccion, :0ld.v_saldo_del_ahorro, v_monto_transaccion, :new.v_saldo_del_ahorro, user, sysdate);
+        END IF;
 
 END carga_auditoria;
 /
@@ -397,15 +466,15 @@ END carga_auditoria;
 
 ------------------Procedimiento5Michael----------------------------
 CREATE OR REPLACE FUNCTION Calculo_interes (
-p_saldoact ahorros.saldo_del_ahorro%TYPE,
-p_interes ahorros.tasa_interes%TYPE)
-RETURN NUMBER IS
-v_tasatotal NUMBER;
-v_interes ahorros.tasa_interes%TYPE;
-BEGIN
- v_interes:=(p_interes/100);
- v_tasatotal:= p_saldoact*v_interes;
-RETURN v_tasatotal;
+    p_saldoact ahorros.saldo_del_ahorro%TYPE,
+    p_interes ahorros.tasa_interes%TYPE)
+    RETURN NUMBER IS
+    v_tasatotal NUMBER;
+    v_interes ahorros.tasa_interes%TYPE;
+    BEGIN
+    v_interes:=(p_interes/100);
+    v_tasatotal:= p_saldoact*v_interes;
+    RETURN v_tasatotal;
 END Calculo_interes;
 /
 
@@ -427,25 +496,27 @@ CREATE OR REPLACE PROCEDURE intereses AS
     v_interestotal ahorros.tasa_interes%TYPE,
     v_nuevo ahorros.saldo_del_ahorro%TYPE;
 
-CURSOR c_tipo_cuenta IS
-SELECT * IS
-FROM ahorros
-WHERE id_tipo_ahorro = 'Corriente';
+    CURSOR c_tipo_cuenta IS
+    SELECT * IS
+    FROM ahorros
+    WHERE id_tipo_ahorro = 'Corriente';
 
-BEGIN
-OPEN c_tipo_cuenta;
-LOOP
-    FETCH c_tipo_cuenta INTO v_id_cliente, v_id_tipo_ahorro, v_numero_cuenta, v_tasa_interes, v_letra_deposito_mensual, v_saldo_del_ahorro, v_saldo_del_interes
-    v_fecha_de_modificacion, v_usuario, v_interestotal, v_nuevo;
-    EXIT WHEN c_tipo_cuenta%NOTFOUND;
-END LOOP;
+    BEGIN
 
- v_interestotal:= Calculo_interes(v_saldo_del_ahorro,v_tasa_interes);
- v_nuevo:= v_interestotal + v_saldo_del_ahorro; 
+    OPEN c_tipo_cuenta;
+    LOOP
+        FETCH c_tipo_cuenta INTO v_id_cliente, v_id_tipo_ahorro, v_numero_cuenta, v_tasa_interes, v_letra_deposito_mensual, v_saldo_del_ahorro, v_saldo_del_interes
+        v_fecha_de_modificacion, v_usuario, v_interestotal, v_nuevo;
+        EXIT WHEN c_tipo_cuenta%NOTFOUND;
+    END LOOP;
 
-UPDATE ahorro SET tasa_interes = v_interestotal WHERE id_tipo_ahorro = v_id_tipo_ahorro;
-UPDATE ahorro SET saldo_del_ahorro = v_nuevo WHERE id_tipo_ahorro = v_id_tipo_ahorro;
+    v_interestotal:= Calculo_interes(v_saldo_del_ahorro,v_tasa_interes);
+    v_nuevo:= v_interestotal + v_saldo_del_ahorro; 
 
-CLOSE c_tipo_cuenta;
-COMMIT;
+    UPDATE ahorro SET tasa_interes = v_interestotal WHERE id_tipo_ahorro = v_id_tipo_ahorro;
+    UPDATE ahorro SET saldo_del_ahorro = v_nuevo WHERE id_tipo_ahorro = v_id_tipo_ahorro;
+
+    CLOSE c_tipo_cuenta;
+    COMMIT;
 END intereses;
+/
