@@ -124,6 +124,26 @@ CREATE TABLE transacciones(
 	CONSTRAINT id_sucursal_fk2    FOREIGN KEY (id_sucursal) REFERENCES sucursal(id_sucursal));
 
 ------------------Procedimiento1Gabriela----------------------------
+CREATE OR REPLACE PROCEDURE tipo_correos(
+p_descripcion IN  tipo_correo.descripcion%TYPE) IS
+BEGIN 
+INSERT INTO tipo_correo(tipo_correoID, descripcion) values
+(secuencia_correo.nextval,p_descripcion);
+EXCEPTION
+    WHEN DUP_VAL_ON_INDEX THEN
+      DBMS_OUTPUT.PUT_LINE('INSERCION DUPLICADA.');
+END tipo_correos;
+
+CREATE OR REPLACE PROCEDURE tipo_telefonos(
+p_descripcion IN Tipo_telefono.Descripcion%TYPE) IS
+BEGIN
+INSERT INTO tipo_telefono (telefonoID, descripcion)values
+(secuencia_telefono.nextval,p_descripcion);
+EXCEPTION
+    WHEN DUP_VAL_ON_INDEX THEN
+      DBMS_OUTPUT.PUT_LINE('INSERCION DUPLICADA.');
+END tipo_telefonos;
+
 CREATE OR REPLACE PROCEDURE insercion_tipo_ahorro(
     p_descripcion         IN     tipo_de_ahorro.descripcion%TYPE,
     p_tasa_interes         IN     tipo_de_ahorro.tasa_interes%TYPE) AS
@@ -132,29 +152,15 @@ CREATE OR REPLACE PROCEDURE insercion_tipo_ahorro(
     VALUES (secuencia_ahorro.nextval,p_descripcion,p_tasa_interes);
     END insercion_tipo_ahorro;
 
-
-
+CREATE OR REPLACE PROCEDURE tipo_profesion(
+p_profesion IN profesion.profesion%TYPE) IS
 BEGIN 
-    tipo_de_ahorro('Navidad','0.06');
-END;
-/
-
-
-BEGIN 
-    tipo_de_ahorro('Corriente','0.04');
-END;
-/
-
-
-BEGIN 
-    tipo_de_ahorro('Escolar','0.06');
-END;
-/
-
-
-CREATE SEQUENCE secuencia_sucursal
-	START WITH 1
-    INCREMENT BY 1;
+INSERT INTO profesion(id_profesion,profesion) values
+(secuencia_profesion.nextval,p_profesion);
+EXCEPTION
+    WHEN DUP_VAL_ON_INDEX THEN
+      DBMS_OUTPUT.PUT_LINE('INSERCION DUPLICADA.');
+END tipo_profesion;
 
 CREATE OR REPLACE PROCEDURE insercion_sucursal(
     p_nombre    	   IN sucursal.nombre_sucursal%TYPE) AS
@@ -162,27 +168,6 @@ CREATE OR REPLACE PROCEDURE insercion_sucursal(
     INSERT INTO sucursal(id_sucursal,nombre_sucursal,monto_ahorrado,cantidad_ahorro)
     VALUES (secuencia_sucursal.nextval,p_nombre,0,0); 
     END insercion_sucursal;
-/
-
-
-BEGIN
-    insercion_sucursal('Dorado');
-END;
-/
-
-
-BEGIN
-    insercion_sucursal('Chepo');
-END;
-/
-
-
-BEGIN
-    insercion_sucursal('Chorrera');
-END;
-/
-
-
 
 CREATE OR REPLACE PROCEDURE insercion_sucursal_ahorro(
     p_sucursal        IN    Sucursal_tipo_ahorro.id_sucursal%TYPE,
@@ -191,26 +176,55 @@ CREATE OR REPLACE PROCEDURE insercion_sucursal_ahorro(
         INSERT INTO Sucursal_tipo_ahorro(id_sucursal,id_tipo_ahorro,monto_ahorrado,cantidad_tipo_ahorro)
         VALUES (p_sucursal,p_tipo_ahorro,0,0);
 END insercion_sucursal_ahorro;
-/
 
-
+CREATE OR REPLACE FUNCTION calcular_edad(p_calculo_edad IN cliente.fecha_nacimiento%TYPE) 
+RETURN NUMBER
+AS
+v_edad NUMBER;
 BEGIN
-    insercion_sucursal_ahorro(1,2);
-END;
-/
+SELECT FLOOR(months_between(sysdate,p_calculo_edad)/12) INTO v_edad FROM dual;
+RETURN v_edad;
+END calcular_edad;
 
-
+CREATE OR REPLACE PROCEDURE insertar_cliente(
+p_cedula IN cliente.cedula%TYPE,
+p_nombre IN cliente.nombre%TYPE,
+p_apellido IN cliente.apellido%TYPE,
+p_sexo IN cliente.sexo%TYPE,
+p_profesion IN cliente.id_profesion%TYPE,
+p_fechanacimiento IN cliente.fecha_nacimiento%TYPE,
+p_sucursal IN cliente.cod_sucursal%TYPE) IS 
 BEGIN
-    insercion_sucursal_ahorro(2,3);
-END;
-/
+INSERT INTO cliente (clienteID, cedula, nombre, apellido, sexo, id_profesion, fecha_nacimiento, cod_sucursal, edad) values
+(SECUENCIA_CLIENTE.nextval,p_cedula,p_nombre,p_apellido,p_sexo,p_profesion,p_fechanacimiento,p_sucursal, calcular_edad(p_fechanacimiento));
+EXCEPTION
+    WHEN DUP_VAL_ON_INDEX THEN
+      DBMS_OUTPUT.PUT_LINE('INSERCION DUPLICADA.');
+end insertar_cliente;
 
+CREATE OR REPLACE PROCEDURE insertar_correo(
+    p_id_cliente IN correo.clienteid%TYPE,
+    p_cod_email IN correo.tipo_correoid%TYPE,
+    p_email IN  correo.correo%TYPE) IS
+BEGIN 
+    INSERT INTO correo 
+    VALUES(p_id_cliente, p_cod_email, p_email);
+EXCEPTION
+    WHEN DUP_VAL_ON_INDEX THEN
+     DBMS_OUTPUT.PUT_LINE('INSERCION DUPLICADA.');
+END insertar_correo;
 
-BEGIN
-    insercion_sucursal_ahorro(3,1);
-END;
-/
-
+CREATE OR REPLACE PROCEDURE insertar_telefono(
+    p_id_cliente IN Telefono.clienteid%TYPE,
+    p_Cod_tel IN Telefono.telefonoid%TYPE,
+    p_telefono IN  Telefono.Telefono%TYPE) IS
+BEGIN 
+    INSERT INTO Telefono 
+    VALUES(p_id_cliente, p_Cod_tel, p_telefono);
+EXCEPTION
+    WHEN DUP_VAL_ON_INDEX THEN
+      DBMS_OUTPUT.PUT_LINE('INSERCION DUPLICADA.');
+END insertar_telefono;
 
 -------------------Procedimiento2Airlenys----------------------------
 
