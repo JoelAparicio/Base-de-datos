@@ -32,35 +32,35 @@ CREATE TABLE cliente(
     CONSTRAINT fk_id_profesion FOREIGN KEY (id_profesion) REFERENCES profesion(id_profesion));
 
 CREATE TABLE correo(
-    id_cliente number(10),
-    tipo_correoID number (10),
-    correo VARCHAR2(100) not null,
+    id_cliente      number(10),
+    tipo_correoID   number (10),
+    correo          VARCHAR2(100) not null,
     CONSTRAINT id_cliente_tipo_correo_pk PRIMARY KEY (id_cliente,tipo_correoID),
     CONSTRAINT id_cliente_correo_fk FOREIGN KEY (id_cliente) REFERENCES cliente(id_cliente),
     CONSTRAINT tipo_correoID_fk FOREIGN KEY (tipo_correoID) REFERENCES tipo_correo(tipo_correoID));
 
 CREATE TABLE telefono(
-    id_cliente number(10),
-    telefonoID number (10),
-    telefono varchar (9) not null,
+    id_cliente      number(10),
+    telefonoID      number (10),
+    telefono        varchar (9) not null,
     CONSTRAINT id_cliente_telefonoID_pk PRIMARY KEY (id_cliente,telefonoID),
     CONSTRAINT id_cliente_telefono_fk FOREIGN KEY (id_cliente) REFERENCES cliente(id_cliente),
     CONSTRAINT telefonoID_fk FOREIGN KEY (telefonoID) REFERENCES tipo_telefono(telefonoID));
 
 CREATE TABLE ahorros(
-    id_cliente NUMBER(10) NOT NULL, 
-    id_sucursal NUMBER(10) NOT NULL,
-    id_tipo_ahorro NUMBER(10) NOT NULL,
-    numero_cuenta NUMBER(10) NOT NULL,
-    tasa_interes NUMBER(10) NOT NULL,
-    letra_deposito_mensual NUMBER(10) NOT NULL,
-    saldo_del_ahorro NUMBER(10),
-    saldo_del_interes NUMBER(10) NOT NULL,
-    fecha_de_apertura DATE NOT NULL,
-    fecha_de_deposito DATE NOT NULL,
-    fecha_de_retiro DATE,
-    fecha_de_modificacion DATE,
-    usuario VARCHAR(15) NOT NULL,
+    id_cliente              NUMBER(10) NOT NULL, 
+    id_sucursal             NUMBER(10) NOT NULL,
+    id_tipo_ahorro          NUMBER(10) NOT NULL,
+    numero_cuenta           NUMBER(10) NOT NULL,
+    tasa_interes            NUMBER(10) NOT NULL,
+    letra_deposito_mensual  NUMBER(10) NOT NULL,
+    saldo_del_ahorro        NUMBER(10),
+    saldo_del_interes       NUMBER(10) NOT NULL,
+    fecha_de_apertura       DATE NOT NULL,
+    fecha_de_deposito       DATE NOT NULL,
+    fecha_de_retiro         DATE,
+    fecha_de_modificacion   DATE,
+    usuario                 VARCHAR(15) NOT NULL,
     CONSTRAINT numero_cuenta_pk PRIMARY KEY (numero_cuenta), 
     CONSTRAINT id_tipo_ahorro_fk1 FOREIGN KEY (id_tipo_ahorro) REFERENCES tipo_de_ahorro(id_tipo_ahorro),
     CONSTRAINT id_sucursal_fk FOREIGN KEY (id_sucursal) REFERENCES sucursal(id_sucursal));
@@ -76,10 +76,10 @@ CREATE TABLE sucursal(
     CONSTRAINT id_sucursal_pk    PRIMARY KEY (ID_sucursal));
 
 CREATE TABLE Sucursal_tipo_ahorro(
-    id_sucursal         number(10),
-    id_tipo_ahorro      number (10),
-    monto_ahorrado      number(10) NOT NULL,
-    cantidad_tipo_ahorro     number (10) NOT NULL, 
+    id_sucursal             number(10),
+    id_tipo_ahorro          number (10),
+    monto_ahorrado          number(10) NOT NULL,
+    cantidad_tipo_ahorro    number (10) NOT NULL, 
     CONSTRAINT id_sucursal_ahorro_pk PRIMARY KEY (id_sucursal,id_tipo_ahorro),
     CONSTRAINT id_sucursal_fk FOREIGN KEY (id_sucursal) REFERENCES sucursal(id_sucursal),
     CONSTRAINT id_tipo_ahorro_fk FOREIGN KEY (id_tipo_ahorro) REFERENCES tipo_de_ahorro(id_tipo_ahorro));
@@ -131,7 +131,7 @@ CREATE OR REPLACE PROCEDURE insercion_tipo_ahorro(
     INSERT INTO tipo_de_ahorro(id_tipo_ahorro,descripcion,tasa_interes)
     VALUES (secuencia_ahorro.nextval,p_descripcion,p_tasa_interes);
     END insercion_tipo_ahorro;
-/
+
 
 
 BEGIN 
@@ -294,11 +294,11 @@ CREATE SEQUENCE secuencia_transaccion
     INCREMENT BY 1;
 
 CREATE OR REPLACE PROCEDURE registro_transaccion(
-    p_id_sucursal    transacciones.id_sucursal%TYPE,
-    p_id_cliente   transacciones.id_cliente%TYPE,
-    p_id_tipo_ahorro   transacciones.id_tipo_ahorro%TYPE,
+    p_id_sucursal       transacciones.id_sucursal%TYPE,
+    p_id_cliente        transacciones.id_cliente%TYPE,
+    p_id_tipo_ahorro    transacciones.id_tipo_ahorro%TYPE,
     p_tipo_transaccion  transacciones.tipo_transaccion%TYPE,
-    p_monto_transaccion    transacciones.monto_transaccion%TYPE) AS
+    p_monto_transaccion transacciones.monto_transaccion%TYPE) AS
 
     BEGIN
         INSERT INTO transacciones(id_sucursal,id_transaccion,id_cliente,id_tipo_ahorro,fecha_transaccion,tipo_transaccion,monto_transaccion,status,fecha_insersion,usuario)
@@ -466,32 +466,32 @@ END carga_auditoria;
 
 ------------------Procedimiento5Michael----------------------------
 CREATE OR REPLACE FUNCTION Calculo_interes (
-    p_saldoact ahorros.saldo_del_ahorro%TYPE,
-    p_interes ahorros.tasa_interes%TYPE)
+    p_saldoact      ahorros.saldo_del_ahorro%TYPE,
+    p_interes       ahorros.tasa_interes%TYPE)
     RETURN NUMBER IS
-    v_tasatotal NUMBER;
-    v_interes ahorros.tasa_interes%TYPE;
+    v_tasatotal     NUMBER;
+    v_interes       ahorros.tasa_interes%TYPE;
     BEGIN
-    v_interes:=(p_interes/100);
-    v_tasatotal:= p_saldoact*v_interes;
+        v_interes:=(p_interes/100);
+        v_tasatotal:= p_saldoact*v_interes;
     RETURN v_tasatotal;
 END Calculo_interes;
 /
 
 CREATE OR REPLACE PROCEDURE intereses AS
-    v_id_cliente ahorros.id_cliente%TYPE, 
-    `v_id_sucursal ahorros.id_sucursal%TYPE,`
-    v_id_tipo_ahorro ahorros.id_tipo_ahorro%TYPE,
-    v_numero_cuenta ahorros.numero_cuenta%TYPE,
-    v_tasa_interes ahorros.tasa_interes%TYPE,
-    v_letra_deposito_mensual ahorros.letra_deposito_mensual%TYPE,
-    v_saldo_del_ahorro ahorros.saldo_del_ahorro%TYPE,
-    v_saldo_del_interes ahorros.saldo_del_interes%TYPE,
-    `v_fecha_de_apertura ahorros.fecha_de_apertura%TYPE,`
-    `v_fecha_de_deposito ahorros.fecha_de_deposito%TYPE,`
-    `v_fecha_de_retiro ahorros.fecha_de_retiro%TYPE,`
-    v_fecha_de_modificacion ahorros.fecha_de_modificacion%TYPE,
-    v_usuario ahorros.usuario%TYPE,
+    v_id_cliente                ahorros.id_cliente%TYPE, 
+    `v_id_sucursal              ahorros.id_sucursal%TYPE,`
+    v_id_tipo_ahorro            ahorros.id_tipo_ahorro%TYPE,
+    v_numero_cuenta             ahorros.numero_cuenta%TYPE,
+    v_tasa_interes              ahorros.tasa_interes%TYPE,
+    v_letra_deposito_mensual    ahorros.letra_deposito_mensual%TYPE,
+    v_saldo_del_ahorro          ahorros.saldo_del_ahorro%TYPE,
+    v_saldo_del_interes         ahorros.saldo_del_interes%TYPE,
+    `v_fecha_de_apertura        ahorros.fecha_de_apertura%TYPE,`
+    `v_fecha_de_deposito        ahorros.fecha_de_deposito%TYPE,`
+    `v_fecha_de_retiro          ahorros.fecha_de_retiro%TYPE,`
+    v_fecha_de_modificacion     ahorros.fecha_de_modificacion%TYPE,
+    v_usuario                   ahorros.usuario%TYPE,
 
     v_interestotal ahorros.tasa_interes%TYPE,
     v_nuevo ahorros.saldo_del_ahorro%TYPE;

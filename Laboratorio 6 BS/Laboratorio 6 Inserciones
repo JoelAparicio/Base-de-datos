@@ -1,0 +1,12 @@
+BEGIN 
+    tipo_de_ahorro('Navidad','0.06');
+END;
+/
+BEGIN 
+    tipo_de_ahorro('Corriente','0.04');
+END;
+/
+BEGIN 
+    tipo_de_ahorro('Escolar','0.06');
+END;
+/
