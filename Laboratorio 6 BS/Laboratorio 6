@@ -343,6 +343,23 @@ BEGIN
 END actualizacion_sucursal;
 /
 ------------------Trigger2Gabriela----------------------------
+CREATE OR REPLACE TRIGGER actualizacion__sucursal_tipo_ahorro
+AFTER UPDATE ON ahorros FOR EACH ROW
+DECLARE
+v_id_tipo_ahorro     ahorros.id_tipo_ahorro%TYPE;
+v_saldo_ahorro       ahorros.saldo_ahorro%TYPE;
+
+BEGIN
+    SELECT  id_tipo_ahorro, saldo_ahorro 
+    INTO  v_id_tipo_ahorro, v_saldo_ahorro 
+    FROM ahorros ;
+
+    UPDATE Sucursal_tipo_ahorro
+    SET monto_ahorrado = monto_ahorrado + v_saldo_ahorro,
+        cantidad_tipo_ahorro = cantidad_tipo_ahorro + 1
+    WHERE id_tipo_ahorro = v_id_tipo_ahorro;
+END actualizacion__sucursal_tipo_ahorro;
+/
 ------------------Trigger3Airlenys----------------------------
 CREATE OR REPLACE TRIGGER carga_auditoria
 AFTER UPDATE OR INSERT OR DELETE ON transacciones FOR EACH ROW
