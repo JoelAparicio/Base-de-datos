@@ -170,7 +170,6 @@ BEGIN
     insercion_ahorro (4,1,2,60);
 END;
 /
-
 BEGIN
     registro_transaccion(1, 1, 2, 2, 175.00);
 END;
