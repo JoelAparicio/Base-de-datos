@@ -174,10 +174,10 @@ CREATE OR REPLACE PROCEDURE tipo_profesion(
 END tipo_profesion;
 /
 CREATE OR REPLACE PROCEDURE insercion_sucursal(
-    p_nombre    	   IN sucursal.nombre_sucursal%TYPE) AS
-    BEGIN
-    INSERT INTO sucursal(id_sucursal,nombre_sucursal,monto_ahorrado,cantidad_ahorro)
-    VALUES (secuencia_sucursal.nextval,p_nombre,0,0); 
+p_nombre    	   IN sucursal.nombre_sucursal%TYPE) is
+BEGIN
+INSERT INTO sucursal(id_sucursal,nombre_sucursal,monto_ahorrado,cantidad_ahorro)
+VALUES (secuencia_sucursal.nextval,p_nombre,0,0); 
 END insercion_sucursal;
 /
 CREATE OR REPLACE PROCEDURE insercion_sucursal_ahorro(
@@ -364,6 +364,7 @@ CREATE OR REPLACE TRIGGER carga_auditoria
     v_monto_transaccion          transacciones.monto_transaccion%TYPE;
     v_id_cliente                 ahorros.id_cliente%TYPE;
     v_id_tipo_ahorro             ahorros.id_tipo_ahorro%TYPE;
+
     BEGIN
         SELECT t.tipo_transaccion, t.monto_transaccion, a.id_cliente, a.id_tipo_ahorro
         INTO v_tipo_transaccion, v_monto_transaccion, v_id_cliente, v_id_tipo_ahorro 
@@ -414,6 +415,37 @@ CREATE OR REPLACE PROCEDURE pago_corriente AS
         END LOOP;
     CLOSE c_tipo_cuenta;
 END pago_corriente;
+/
+
+
+
+
+
+
+
+
+--------------------------------------añadidura---------------------------
+CREATE OR REPLACE TRIGGER carga_auditoria
+    AFTER UPDATE OR INSERT OR DELETE ON ahorros FOR EACH ROW
+    DECLARE
+    v_tipo_transaccion           transacciones.tipo_transaccion%TYPE;
+    v_monto_transaccion          transacciones.monto_transaccion%TYPE;
+    BEGIN
+        SELECT tipo_transaccion, monto_transaccion
+        INTO v_tipo_transaccion, v_monto_transaccion
+        FROM transacciones 
+        WHERE status = 'S';
+        IF INSERTING THEN
+            INSERT INTO auditoria (id_transaccion, Tabla, Tipo_operacion, id_cliente, id_tipo_ahorro, tipo_transaccion, Saldo_Anterior, monto_deposito, Saldo_Final, usuario, fecha) 
+            VALUES (secuencia_auditoria.nextval , 'ahorros','I', :new.id_cliente, :new.id_tipo_ahorro, v_tipo_transaccion, :new.saldo_del_ahorro, v_monto_transaccion, :new.saldo_del_ahorro, user, sysdate);
+        ELSIF UPDATING THEN
+            INSERT INTO auditoria (id_transaccion, Tabla, Tipo_operacion, id_cliente, id_tipo_ahorro, tipo_transaccion, Saldo_Anterior, monto_deposito, Saldo_Final, usuario, fecha) 
+            VALUES (secuencia_auditoria.nextval , 'ahorros','U', :new.id_cliente, :new.id_tipo_ahorro, v_tipo_transaccion,  :old.saldo_del_ahorro, v_monto_transaccion, :new.saldo_del_ahorro, user, sysdate);
+        ELSIF DELETING THEN
+            INSERT INTO auditoria (id_transaccion, Tabla, Tipo_operacion, id_cliente, id_tipo_ahorro, tipo_transaccion, Saldo_Anterior, monto_deposito, Saldo_Final, usuario, fecha) 
+            VALUES (secuencia_auditoria.nextval , 'ahorros','D', :new.id_cliente, :new.id_tipo_ahorro, v_tipo_transaccion, :old.saldo_del_ahorro, v_monto_transaccion, :new.saldo_del_ahorro, user, sysdate);
+        END IF;
+END carga_auditoria;
 /
 
     
