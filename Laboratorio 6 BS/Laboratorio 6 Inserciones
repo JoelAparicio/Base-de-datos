@@ -11,6 +11,34 @@ BEGIN
 END;
 /
 BEGIN 
+    tipo_telefonos('Celular');
+END;
+/
+BEGIN 
+    tipo_telefonos('Residencial');
+END;
+/
+BEGIN 
+    tipo_telefonos('Celular de conyugue');
+END;
+/
+BEGIN 
+    tipo_telefonos('Celular de familiar cercano');
+END;
+/
+BEGIN 
+    insercion_tipo_ahorro('Navidad',0.06);
+END;
+/
+BEGIN 
+    insercion_tipo_ahorro('Corriente',0.04);
+END;
+/
+BEGIN 
+    insercion_tipo_ahorro('Escolar',0.06);
+END;
+/
+BEGIN 
     tipo_profesion('Camarero');
 END;
 /
@@ -24,34 +52,6 @@ END;
 /
 BEGIN 
     tipo_profesion('Ingeniero');
-END;
-/
-BEGIN 
-    tipo_telefonos('Celular');
-END;
-/
-BEGIN 
-    tipo_telefonos('Residencial');
-END;
-/
-BEGIN 
-    tipo_telefonos('Celular de familiar cercano');
-END;
-/
-BEGIN 
-tipo_telefonos('Celular de conyugue');
-END;
-/
-BEGIN 
-    tipo_de_ahorro('Navidad','0.06');
-END;
-/
-BEGIN 
-    tipo_de_ahorro('Corriente','0.04');
-END;
-/
-BEGIN 
-    tipo_de_ahorro('Escolar','0.06');
 END;
 /
 BEGIN
@@ -95,62 +95,99 @@ BEGIN
 END;
 /
 BEGIN 
-insertar_correo(1, 1, 'emily.fong@gmail.com');
+    insertar_correo(1, 1, 'emily.fong@gmail.com');
 END;
 /
 BEGIN 
-insertar_correo(1, 3, 'carlos.restrepo@gmail.com');
+    insertar_correo(1, 3, 'carlos.restrepo@gmail.com');
 END;
 /
 BEGIN 
-insertar_correo(3, 1, 'ariel.gutierrez@gmail.com');
+    insertar_correo(3, 1, 'ariel.gutierrez@gmail.com');
 END;
 /
 BEGIN 
-insertar_correo(3, 3, 'cesar.rodriguez@gmail.com');
+    insertar_correo(3, 3, 'cesar.rodriguez@gmail.com');
 END;
 /
 BEGIN 
-insertar_correo(2, 1, 'cecydi.bethancourt@gmail.com');
+    insertar_correo(2, 1, 'cecydi.bethancourt@gmail.com');
 END;
 /
 BEGIN 
-insertar_correo(2, 3, 'agustin2649@gmail.com');
+    insertar_correo(2, 3, 'agustin2649@gmail.com');
 END;
 /
 BEGIN 
-insertar_correo(4, 1, 'estefanyH284@gmail.com');
+    insertar_correo(4, 1, 'estefanyH284@gmail.com');
 END;
 /
 BEGIN 
-insertar_correo(4, 3, 'henryquintana@gmail.com');
+    insertar_correo(4, 3, 'henryquintana@gmail.com');
 END;
 /
 BEGIN 
-insertar_telefono(1, 1, '7463-4583');
+    insertar_telefono(1, 1, '7463-4583');
 END;
 /
 BEGIN 
-insertar_telefono(3, 1, '6027-1276');
+    insertar_telefono(3, 1, '6027-1276');
 END;
 /
 BEGIN 
-insertar_telefono(3, 2, '620-7932');
+    insertar_telefono(3, 2, '620-7932');
 END;
 /
 BEGIN 
-insertar_telefono(2, 1, '6017-7294');
+    insertar_telefono(2, 1, '6017-7294');
 END;
 /
 BEGIN 
-insertar_telefono(2, 4, '6183-7924');
+    insertar_telefono(2, 4, '6183-7924');
 END;
 /
 BEGIN 
-insertar_telefono(4, 2, '604-8720');
+    insertar_telefono(4, 2, '604-8720');
 END;
 /
 BEGIN 
-insertar_telefono(4, 3, '6123-8402');
+    insertar_telefono(4, 3, '6123-8402');
+END;
+/
+BEGIN
+    insercion_ahorro (1,1,1,20);
+END;
+/
+BEGIN
+    insercion_ahorro (2,1,2,50);
+END;
+/
+BEGIN
+    insercion_ahorro (3,2,3,10);
+END;
+/
+BEGIN
+    insercion_ahorro (4,1,2,60);
+END;
+/
+
+BEGIN
+    registro_transaccion(1, 1, 2, 2, 175.00);
+END;
+/
+BEGIN
+    registro_transaccion(2, 3, 1, 1, 74.00);
+END;
+/
+BEGIN
+    registro_transaccion(2, 2, 3, 2, 95.00);
+END;
+/
+BEGIN
+    actualizacion_pago;
+END;
+/
+BEGIN
+    pago_corriente;
 END;
 /
