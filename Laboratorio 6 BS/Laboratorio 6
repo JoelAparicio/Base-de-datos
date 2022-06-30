@@ -361,30 +361,27 @@ END actualizacion_sucursal_ahorro;
 CREATE OR REPLACE TRIGGER carga_auditoria
     AFTER UPDATE OR INSERT OR DELETE ON ahorros FOR EACH ROW
     DECLARE
-    v_tipo_transaccion           transacciones.tipo_transaccion%TYPE;
-    v_monto_transaccion          transacciones.monto_transaccion%TYPE;
-    v_status                     transacciones.status%TYPE;
-    CURSOR c_capturar IS
-        SELECT tipo_transaccion, monto_transaccion,status
-        FROM transacciones
-        WHERE status = 'S';
+    v_monto_deposito             NUMBER(10);
+    v_tipo_transaccion           NUMBER(1);
     BEGIN  
+        IF :new.saldo_del_ahorro > :old.saldo_del_ahorro THEN
+            v_tipo_transaccion := 1;
+        ELSE
+            v_tipo_transaccion := 2;
+        END IF;
+        v_monto_deposito := ABS(:new.saldo_del_ahorro - :old.saldo_del_ahorro);
+    
         IF INSERTING THEN
             INSERT INTO auditoria (id_transaccion, Tabla, Tipo_operacion, id_cliente, id_tipo_ahorro, tipo_transaccion, Saldo_Anterior, monto_deposito, Saldo_Final, usuario, fecha) 
-            VALUES (secuencia_auditoria.nextval , 'ahorros','I', :new.id_cliente, :new.id_tipo_ahorro, 3, :new.saldo_del_ahorro, 0, :new.saldo_del_ahorro, user, sysdate);
+            VALUES (secuencia_auditoria.nextval , 'ahorros','I', :new.id_cliente, :new.id_tipo_ahorro, 0, :new.saldo_del_ahorro, 0, :new.saldo_del_ahorro, user, sysdate);
         ELSIF UPDATING THEN
-            OPEN c_capturar;
-            LOOP
-                FETCH c_capturar INTO v_tipo_transaccion,v_monto_transaccion,v_status;            
-                EXIT WHEN c_capturar%NOTFOUND;  
-                INSERT INTO auditoria (id_transaccion, Tabla, Tipo_operacion, id_cliente, id_tipo_ahorro, tipo_transaccion, Saldo_Anterior, monto_deposito, Saldo_Final, usuario, fecha) 
-                VALUES (secuencia_auditoria.nextval , 'ahorros','U', :new.id_cliente, :new.id_tipo_ahorro, v_tipo_transaccion,  :old.saldo_del_ahorro, v_monto_transaccion, :new.saldo_del_ahorro, user, sysdate);
-            END LOOP;
-            CLOSE c_capturar;
+            INSERT INTO auditoria (id_transaccion, Tabla, Tipo_operacion, id_cliente, id_tipo_ahorro, tipo_transaccion, Saldo_Anterior, monto_deposito, Saldo_Final, usuario, fecha) 
+            VALUES (secuencia_auditoria.nextval , 'ahorros','U', :new.id_cliente, :new.id_tipo_ahorro, v_tipo_transaccion,  :old.saldo_del_ahorro, v_monto_deposito, :new.saldo_del_ahorro, user, sysdate);
+
         ELSIF DELETING THEN
             INSERT INTO auditoria (id_transaccion, Tabla, Tipo_operacion, id_cliente, id_tipo_ahorro, tipo_transaccion, Saldo_Anterior, monto_deposito, Saldo_Final, usuario, fecha) 
-            VALUES (secuencia_auditoria.nextval , 'ahorros','D', :old.id_cliente, :old.id_tipo_ahorro, v_tipo_transaccion, :old.saldo_del_ahorro, v_monto_transaccion, :old.saldo_del_ahorro, user, sysdate);
-        END IF;
+            VALUES (secuencia_auditoria.nextval , 'ahorros','D', :old.id_cliente, :old.id_tipo_ahorro, v_tipo_transaccion, :old.saldo_del_ahorro, v_monto_deposito, :old.saldo_del_ahorro, user, sysdate);
+        END IF; 
 END carga_auditoria;
 /
 CREATE OR REPLACE FUNCTION Calculo_interes2 (
@@ -633,3 +630,8 @@ order by c.id_cliente asc;
 
 select * from ahorro_cliente;
 select * from cliente_sucursal;
+
+
+UPDATE ahorros
+SET saldo_del_ahorro = saldo_del_ahorro - 100
+WHERE numero_cuenta = 4;
