@@ -358,7 +358,6 @@ BEGIN
 insertar_telefono(4, 3, '6123-8402');
 END;
 /
-QUEDE AQUI EL JUEVES
 CREATE OR REPLACE PROCEDURE insersion_prestamo(
     p_clienteid IN prestamo.clienteID%TYPE,
     p_tipo_prestamo IN prestamo.tipo_prestamoid%TYPE,
@@ -541,5 +540,3 @@ from sucursal s, sucursal_tipo_prestamo t,prestamo p, tipo_de_prestamo d
 where s.cod_sucursal=p.cod_sucursal and t.tipo_Prestamoid = d.tipo_prestamoid and p.tipo_prestamoid=d.tipo_prestamoid;
 
 select * from sucursal_prestamo;
-
-
