@@ -183,6 +183,10 @@ BEGIN
 END;
 /
 BEGIN
+    registro_transaccion(3, 4, 1, 1, 280.00);
+END;
+/
+BEGIN
     actualizacion_pago;
 END;
 /

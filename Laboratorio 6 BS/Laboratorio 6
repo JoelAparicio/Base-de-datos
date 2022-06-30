@@ -288,6 +288,7 @@ CREATE OR REPLACE PROCEDURE actualizacion_pago AS
     v_calculo_interes       number;
     v_tipo_transaccion      transacciones.tipo_transaccion%TYPE;
     v_status                transacciones.status%TYPE;
+    v_validacion            ahorros.saldo_del_ahorro%TYPE;
     CURSOR c_actualizar IS
         SELECT id_sucursal, id_transaccion, id_cliente, id_tipo_ahorro,tipo_transaccion, monto_transaccion, fecha_insersion, fecha_transaccion,status
         FROM transacciones
@@ -313,9 +314,17 @@ CREATE OR REPLACE PROCEDURE actualizacion_pago AS
                         SET saldo_del_ahorro = saldo_del_ahorro + v_monto_transaccion
                         WHERE id_cliente = v_id_cliente;  
                     ELSE
-                        UPDATE ahorros
-                        SET saldo_del_ahorro = saldo_del_ahorro - v_monto_transaccion
-                        WHERE id_cliente = v_id_cliente;  
+                        SELECT saldo_del_ahorro
+                        INTO v_validacion
+                        FROM ahorros
+                        WHERE id_cliente = v_id_cliente;
+                        IF v_validacion = 0 THEN
+                            dbms_output.put_line('Saldo insuficiente');
+                        ELSE
+                            UPDATE ahorros
+                            SET saldo_del_ahorro = saldo_del_ahorro - v_monto_transaccion
+                            WHERE id_cliente = v_id_cliente;
+                        END IF;  
                     END IF;
                 ELSE
                     dbms_output.put_line('No puede realizar retiro');
@@ -333,38 +342,20 @@ END actualizacion_pago;
 /
 CREATE OR REPLACE TRIGGER actualizacion_sucursal
     AFTER UPDATE ON ahorros FOR EACH ROW
-        DECLARE
-        v_id_sucursal     ahorros.id_sucursal%TYPE;
-        v_saldo_del_ahorro       ahorros.saldo_del_ahorro%TYPE;
-        CURSOR c_actualizar1 IS
-            SELECT id_sucursal,saldo_del_ahorro
-            FROM ahorros;
-        BEGIN
-        OPEN c_actualizar1;
-        LOOP
-            FETCH c_actualizar1 INTO v_id_sucursal,v_saldo_del_ahorro ;            
-            EXIT WHEN c_actualizar1%NOTFOUND;     
-            UPDATE sucursal
-            SET monto_ahorrado = monto_ahorrado + v_saldo_del_ahorro,
-                cantidad_ahorro = cantidad_ahorro + 1
-            WHERE id_sucursal = v_id_sucursal;
-        END LOOP;
-            CLOSE c_actualizar1;
+    BEGIN
+        UPDATE sucursal
+        SET monto_ahorrado = monto_ahorrado + :new.saldo_del_ahorro,
+            cantidad_ahorro = cantidad_ahorro + 1
+        WHERE id_sucursal = :old.id_sucursal;
 END actualizacion_sucursal;
 /
 CREATE OR REPLACE TRIGGER actualizacion_sucursal_ahorro
     AFTER UPDATE ON ahorros FOR EACH ROW
-        DECLARE
-        v_id_tipo_ahorro     ahorros.id_tipo_ahorro%TYPE;
-        v_saldo_del_ahorro       ahorros.saldo_del_ahorro%TYPE;
-        BEGIN
-            SELECT  id_tipo_ahorro, saldo_del_ahorro 
-            INTO  v_id_tipo_ahorro, v_saldo_del_ahorro 
-            FROM ahorros ;
-            UPDATE Sucursal_tipo_ahorro
-            SET monto_ahorrado = monto_ahorrado + v_saldo_del_ahorro,
+    BEGIN
+        UPDATE Sucursal_tipo_ahorro
+        SET monto_ahorrado = monto_ahorrado + :new.saldo_del_ahorro,
                 cantidad_tipo_ahorro = cantidad_tipo_ahorro + 1
-            WHERE id_tipo_ahorro = v_id_tipo_ahorro AND id_sucursal = v_id_tipo_ahorro;
+        WHERE id_tipo_ahorro = :old.id_tipo_ahorro AND id_sucursal = :old.id_sucursal;
 END actualizacion_sucursal_ahorro;
 /
 CREATE OR REPLACE TRIGGER carga_auditoria
