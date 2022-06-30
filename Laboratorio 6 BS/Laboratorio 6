@@ -363,6 +363,7 @@ CREATE OR REPLACE TRIGGER carga_auditoria
     DECLARE
     v_tipo_transaccion           transacciones.tipo_transaccion%TYPE;
     v_monto_transaccion          transacciones.monto_transaccion%TYPE;
+    v_status                     transacciones.status%TYPE;
     CURSOR c_capturar IS
         SELECT tipo_transaccion, monto_transaccion,status
         FROM transacciones
@@ -374,11 +375,12 @@ CREATE OR REPLACE TRIGGER carga_auditoria
         ELSIF UPDATING THEN
             OPEN c_capturar;
             LOOP
-                FETCH c_capturar INTO v_tipo_transaccion,v_monto_transaccion;            
-                EXIT WHEN c_actualizar%NOTFOUND;  
+                FETCH c_capturar INTO v_tipo_transaccion,v_monto_transaccion,v_status;            
+                EXIT WHEN c_capturar%NOTFOUND;  
                 INSERT INTO auditoria (id_transaccion, Tabla, Tipo_operacion, id_cliente, id_tipo_ahorro, tipo_transaccion, Saldo_Anterior, monto_deposito, Saldo_Final, usuario, fecha) 
                 VALUES (secuencia_auditoria.nextval , 'ahorros','U', :new.id_cliente, :new.id_tipo_ahorro, v_tipo_transaccion,  :old.saldo_del_ahorro, v_monto_transaccion, :new.saldo_del_ahorro, user, sysdate);
             END LOOP;
+            CLOSE c_capturar;
         ELSIF DELETING THEN
             INSERT INTO auditoria (id_transaccion, Tabla, Tipo_operacion, id_cliente, id_tipo_ahorro, tipo_transaccion, Saldo_Anterior, monto_deposito, Saldo_Final, usuario, fecha) 
             VALUES (secuencia_auditoria.nextval , 'ahorros','D', :old.id_cliente, :old.id_tipo_ahorro, v_tipo_transaccion, :old.saldo_del_ahorro, v_monto_transaccion, :old.saldo_del_ahorro, user, sysdate);
@@ -402,7 +404,7 @@ CREATE OR REPLACE PROCEDURE pago_corriente AS
     v_saldo_del_ahorro          ahorros.saldo_del_ahorro%TYPE;
     v_interestotal              number;
     CURSOR c_tipo_cuenta IS
-    SELECT numero_cuenta, id_tipo_ahorro,tasa_interes,saldo_del_ahorro
+    SELECT numero_cuenta, id_tipo_ahorro,tasa_interes,saldo_del_ahorro 
     FROM ahorros
     WHERE id_tipo_ahorro = 2;
     BEGIN
@@ -413,42 +415,221 @@ CREATE OR REPLACE PROCEDURE pago_corriente AS
             v_interestotal:= Calculo_interes2(v_saldo_del_ahorro,v_tasa_interes);
             UPDATE ahorros 
             SET saldo_del_interes = v_interestotal,
-                saldo_del_ahorro = saldo_del_ahorro + v_interestotal
+                saldo_del_ahorro = saldo_del_ahorro + v_interestotal,
+                fecha_de_modificacion = sysdate + 30
             WHERE id_tipo_ahorro = v_id_tipo_ahorro AND numero_cuenta = v_numero_cuenta;
         END LOOP;
     CLOSE c_tipo_cuenta;
 END pago_corriente;
 /
-
-
-
-
-
-
-
-
---------------------------------------añadidura---------------------------
-CREATE OR REPLACE TRIGGER carga_auditoria
-    AFTER UPDATE OR INSERT OR DELETE ON ahorros FOR EACH ROW
-    DECLARE
-    v_tipo_transaccion           transacciones.tipo_transaccion%TYPE;
-    v_monto_transaccion          transacciones.monto_transaccion%TYPE;
-    BEGIN
-        SELECT tipo_transaccion, monto_transaccion
-        INTO v_tipo_transaccion, v_monto_transaccion
-        FROM transacciones 
-        WHERE status = 'S';
-        IF INSERTING THEN
-            INSERT INTO auditoria (id_transaccion, Tabla, Tipo_operacion, id_cliente, id_tipo_ahorro, tipo_transaccion, Saldo_Anterior, monto_deposito, Saldo_Final, usuario, fecha) 
-            VALUES (secuencia_auditoria.nextval , 'ahorros','I', :new.id_cliente, :new.id_tipo_ahorro, v_tipo_transaccion, :new.saldo_del_ahorro, v_monto_transaccion, :new.saldo_del_ahorro, user, sysdate);
-        ELSIF UPDATING THEN
-            INSERT INTO auditoria (id_transaccion, Tabla, Tipo_operacion, id_cliente, id_tipo_ahorro, tipo_transaccion, Saldo_Anterior, monto_deposito, Saldo_Final, usuario, fecha) 
-            VALUES (secuencia_auditoria.nextval , 'ahorros','U', :new.id_cliente, :new.id_tipo_ahorro, v_tipo_transaccion,  :old.saldo_del_ahorro, v_monto_transaccion, :new.saldo_del_ahorro, user, sysdate);
-        ELSIF DELETING THEN
-            INSERT INTO auditoria (id_transaccion, Tabla, Tipo_operacion, id_cliente, id_tipo_ahorro, tipo_transaccion, Saldo_Anterior, monto_deposito, Saldo_Final, usuario, fecha) 
-            VALUES (secuencia_auditoria.nextval , 'ahorros','D', :old.id_cliente, :old.id_tipo_ahorro, v_tipo_transaccion, :old.saldo_del_ahorro, v_monto_transaccion, :old.saldo_del_ahorro, user, sysdate);
-        END IF;
-END carga_auditoria;
+BEGIN 
+    tipo_correos('Personal');
+END;
 /
+BEGIN 
+    tipo_correos('Laboral');
+END;
+/
+BEGIN 
+    tipo_correos('Academico');
+END;
+/
+BEGIN 
+    tipo_telefonos('Celular');
+END;
+/
+BEGIN 
+    tipo_telefonos('Residencial');
+END;
+/
+BEGIN 
+    tipo_telefonos('Celular de conyugue');
+END;
+/
+BEGIN 
+    tipo_telefonos('Celular de familiar cercano');
+END;
+/
+BEGIN 
+    insercion_tipo_ahorro('Navidad',0.06);
+END;
+/
+BEGIN 
+    insercion_tipo_ahorro('Corriente',0.04);
+END;
+/
+BEGIN 
+    insercion_tipo_ahorro('Escolar',0.06);
+END;
+/
+BEGIN 
+    tipo_profesion('Camarero');
+END;
+/
+BEGIN 
+    tipo_profesion('Marinero');
+END;
+/
+BEGIN 
+    tipo_profesion('Cajero');
+END;
+/
+BEGIN 
+    tipo_profesion('Ingeniero');
+END;
+/
+BEGIN
+    insercion_sucursal('Dorado');
+END;
+/
+BEGIN
+    insercion_sucursal('Chepo');
+END;
+/
+BEGIN
+    insercion_sucursal('Chorrera');
+END;
+/
+BEGIN
+    insercion_sucursal_ahorro(1,2);
+END;
+/
+BEGIN
+    insercion_sucursal_ahorro(2,3);
+END;
+/
+BEGIN
+    insercion_sucursal_ahorro(3,1);
+END;
+/
+BEGIN
+    insertar_cliente('8-977-47','Joel','Aparicio','M',1,TO_DATE('01/12/1994','DD/MM/YYYY'),1);
+END;
+/
+BEGIN
+    insertar_cliente('8-973-789','Airlenys','Recuero','F',2,TO_DATE('01/07/1999','DD/MM/YYYY'),2);
+END;
+/
+BEGIN
+    insertar_cliente('8-923-2393','Michael','Cerrud','M',3,TO_DATE('01/06/1997','DD/MM/YYYY'),1);
+END;
+/
+BEGIN
+    insertar_cliente('8-991-4938','Gariela','Vasquez','F',4,TO_DATE('26/03/2001','DD/MM/YYYY'),2);
+END;
+/
+BEGIN 
+    insertar_correo(1, 1, 'emily.fong@gmail.com');
+END;
+/
+BEGIN 
+    insertar_correo(1, 3, 'carlos.restrepo@gmail.com');
+END;
+/
+BEGIN 
+    insertar_correo(3, 1, 'ariel.gutierrez@gmail.com');
+END;
+/
+BEGIN 
+    insertar_correo(3, 3, 'cesar.rodriguez@gmail.com');
+END;
+/
+BEGIN 
+    insertar_correo(2, 1, 'cecydi.bethancourt@gmail.com');
+END;
+/
+BEGIN 
+    insertar_correo(2, 3, 'agustin2649@gmail.com');
+END;
+/
+BEGIN 
+    insertar_correo(4, 1, 'estefanyH284@gmail.com');
+END;
+/
+BEGIN 
+    insertar_correo(4, 3, 'henryquintana@gmail.com');
+END;
+/
+BEGIN 
+    insertar_telefono(1, 1, '7463-4583');
+END;
+/
+BEGIN 
+    insertar_telefono(3, 1, '6027-1276');
+END;
+/
+BEGIN 
+    insertar_telefono(3, 2, '620-7932');
+END;
+/
+BEGIN 
+    insertar_telefono(2, 1, '6017-7294');
+END;
+/
+BEGIN 
+    insertar_telefono(2, 4, '6183-7924');
+END;
+/
+BEGIN 
+    insertar_telefono(4, 2, '604-8720');
+END;
+/
+BEGIN 
+    insertar_telefono(4, 3, '6123-8402');
+END;
+/
+BEGIN
+    insercion_ahorro (1,1,1,20);
+END;
+/
+BEGIN
+    insercion_ahorro (2,1,2,50);
+END;
+/
+BEGIN
+    insercion_ahorro (3,2,3,10);
+END;
+/
+BEGIN
+    insercion_ahorro (4,3,2,60);
+END;
+/
+BEGIN
+    registro_transaccion(1, 1, 2, 2, 175.00);
+END;
+/
+BEGIN
+    registro_transaccion(2, 3, 1, 1, 74.00);
+END;
+/
+BEGIN
+    registro_transaccion(2, 2, 3, 2, 95.00);
+END;
+/
+BEGIN
+    registro_transaccion(3, 4, 1, 1, 280.00);
+END;
+/
+BEGIN
+    actualizacion_pago;
+END;
+/
+BEGIN
+    pago_corriente;
+END;
+/
+create or replace view ahorro_cliente as
+select c.id_cliente as "Codigo de cliente",c.nombre || ' ' ||c.apellido as "Cliente", t.descripcion as "Tipo de ahorro",a.fecha_de_apertura as "Fecha de apertura",
+a.saldo_del_ahorro as "Saldo del ahorro"
+from cliente c , ahorros a, tipo_de_ahorro t
+where t.id_tipo_ahorro = a.id_tipo_ahorro AND c.id_cliente = a.id_cliente
+order by c.id_cliente asc;
+/
+create or replace view cliente_sucursal as
+select c.id_cliente as "Codigo de cliente",c.nombre || ' ' ||c.apellido as "Cliente", t.descripcion as "Tipo de ahorro", s.nombre_sucursal as "Nombre sucursal"
+from cliente c, ahorros a, tipo_de_ahorro t , sucursal s
+where t.id_tipo_ahorro = a.id_tipo_ahorro AND c.id_cliente = a.id_cliente AND a.id_sucursal = s.id_sucursal   
+order by c.id_cliente asc; 
 
-    
+select * from ahorro_cliente;
+select * from cliente_sucursal;
