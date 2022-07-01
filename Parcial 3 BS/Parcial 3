@@ -126,6 +126,9 @@ CREATE SEQUENCE secuencia_telefono
 CREATE SEQUENCE secuencia_transaccion
     START WITH 1
     INCREMENT BY 1;
+CREATE SEQUENCE secuencia_auditoria
+    START WITH 1
+    INCREMENT BY 1;
 ALTER SESSION SET nls_date_format='DD-MM-YYYY HH24:MI:SS';
 CREATE OR REPLACE PROCEDURE tipo_telefonos(
 p_descripcion IN Tipo_telefono.Descripcion%TYPE) IS
@@ -385,22 +388,34 @@ CREATE OR REPLACE PROCEDURE insersion_prestamo(
 BEGIN
     INSERT INTO prestamo (clienteid, tipo_prestamoID, numero_prestamo, fecha_aprobado, monto_aprobado, tasa_interes, letra_mensual, monto_pagado, fecha_pago,cod_sucursal,saldoactual, interespagado, fechamodificacion, usuario)  values 
     (p_clienteid,p_tipo_prestamo, SECUENCIA_PRESTAMO.nextval, p_fecha_aprobado, p_monto_aprobado, p_tasa_interes, p_letra_mensual, 0, p_fecha_aprobado ,p_cod_sucursal,p_monto_aprobado, 0, p_fecha_aprobado, user);
-UPDATE sucursal
-SET monto_prestamos = monto_prestamos + p_monto_aprobado,
-    cantidad = cantidad + 1
-WHERE cod_sucursal = p_cod_sucursal;
-UPDATE Sucursal_tipo_prestamo
-SET monto_prestamos = monto_prestamos + p_monto_aprobado,
-    cantidad = cantidad + 1
-WHERE tipo_prestamoID = p_tipo_prestamo;
-IF SQL%NOTFOUND THEN
-    INSERT INTO Sucursal_tipo_prestamo(cod_sucursal, tipo_prestamoid, monto_prestamos, cantidad)
-    VALUES (p_cod_sucursal, p_tipo_prestamo, p_monto_aprobado, 1);
-END IF;
 EXCEPTION
     WHEN DUP_VAL_ON_INDEX THEN
       DBMS_OUTPUT.PUT_LINE('INSERCION DUPLICADA.');
 END insersion_prestamo;
+/
+CREATE OR REPLACE TRIGGER aprobacion_auditoria
+    AFTER INSERT ON prestamo FOR EACH ROW
+    BEGIN  
+        INSERT INTO auditoria (id_transaccion,tabla,Tipo_operacion,clienteid,tipo_prestamoid,monto_aprobado,monto_del_pago,interespagado,saldo_anterior,saldo_final,usuario,fecha)
+        VALUES (secuencia_auditoria.nextval , 'Prestamo','I', :new.clienteid, :new.tipo_prestamoid, :new.monto_aprobado,0,0,0,:new.monto_aprobado, user, sysdate);
+END aprobacion_auditoria;
+/
+CREATE OR REPLACE TRIGGER carga_prestamo
+    AFTER INSERT ON prestamo FOR EACH ROW
+    BEGIN  
+        UPDATE sucursal
+        SET monto_prestamos = monto_prestamos + :new.monto_aprobado,
+            cantidad = cantidad + 1
+        WHERE cod_sucursal = :new.cod_sucursal;
+        UPDATE Sucursal_tipo_prestamo
+        SET monto_prestamos = monto_prestamos + :new.monto_aprobado,
+            cantidad = cantidad + 1
+        WHERE tipo_prestamoID = :new.tipo_prestamoid AND cod_sucursal = :new.cod_sucursal;
+        IF SQL%NOTFOUND THEN
+            INSERT INTO Sucursal_tipo_prestamo(cod_sucursal, tipo_prestamoid, monto_prestamos, cantidad)
+            VALUES (:new.cod_sucursal, :new.tipo_prestamoid, :new.monto_aprobado, 1);
+        END IF;
+END carga_prestamo;
 /
 Begin
     insersion_prestamo(3,1,TO_DATE('09/03/2021 19:23:12','DD/MM/YYYY HH24:MI:SS'),10000,0.05,500,1);
@@ -427,6 +442,23 @@ EXCEPTION
     WHEN DUP_VAL_ON_INDEX THEN
       DBMS_OUTPUT.PUT_LINE('INSERCION DUPLICADA.');
 END insertar_transaccion;
+/
+CREATE OR REPLACE TRIGGER transacciones_auditoria
+    AFTER UPDATE OR DELETE ON prestamo FOR EACH ROW
+    DECLARE
+    v_saldo_real       NUMBER(10);
+    v_interes_real   NUMBER(10);
+    BEGIN
+        v_interes_real:=ABS(:old.interespagado - :new.interespagado);
+        v_saldo_real := ABS(:old.saldoactual - :new.saldoactual)+v_interes_real;
+        IF UPDATING THEN
+            INSERT INTO auditoria (id_transaccion,tabla,Tipo_operacion,clienteid,tipo_prestamoid,monto_aprobado,monto_del_pago,interespagado,saldo_anterior,saldo_final,usuario,fecha)
+            VALUES (secuencia_auditoria.nextval , 'Prestamo','U', :new.clienteid, :new.tipo_prestamoid, :old.monto_aprobado,v_saldo_real,:new.interespagado,:old.saldoactual,:new.saldoactual, user, sysdate);
+        ELSIF DELETING THEN
+            INSERT INTO auditoria (id_transaccion,tabla,Tipo_operacion,clienteid,tipo_prestamoid,monto_aprobado,monto_del_pago,interespagado,saldo_anterior,saldo_final,usuario,fecha)
+            VALUES (secuencia_auditoria.nextval , 'Prestamo','D', :old.clienteid, :old.tipo_prestamoid, :old.monto_aprobado,0,0,0,:old.monto_aprobado, user, sysdate);
+        END IF;
+END transacciones_auditoria;
 /
 BEGIN
 insertar_transaccion (2,2,3,TO_DATE('08/04/2021','DD/MM/YYYY'),2500); 
@@ -490,12 +522,6 @@ BEGIN
                 monto_pagado = monto_pagado + v_Montodepago,
                 fecha_pago = sysdate
             WHERE clienteID = v_cliente AND tipo_prestamoid=v_Tipo_Prestamo;
-            UPDATE sucursal
-            SET monto_prestamos = monto_prestamos - v_Montodepago
-            WHERE Cod_sucursal = v_Cod_sucursal;
-            UPDATE Sucursal_tipo_prestamo
-            SET monto_prestamos = monto_prestamos - v_Montodepago
-            WHERE Cod_sucursal = v_Cod_sucursal AND tipo_prestamoid = V_Tipo_Prestamo;
         ELSIF v_Montodepago > v_interes_calculado THEN
             V_sobrante:= v_Montodepago - v_interes_calculado;
             UPDATE prestamo
@@ -505,12 +531,6 @@ BEGIN
                 fechamodificacion = sysdate,
                 fecha_pago = sysdate
             WHERE clienteID = v_cliente AND tipo_prestamoid=v_Tipo_Prestamo;
-            UPDATE sucursal
-            SET monto_prestamos = monto_prestamos - v_Montodepago
-            WHERE Cod_sucursal = v_Cod_sucursal;
-            UPDATE Sucursal_tipo_prestamo
-            SET monto_prestamos = monto_prestamos - v_Montodepago
-            WHERE Cod_sucursal = v_Cod_sucursal AND tipo_prestamoid = V_Tipo_Prestamo;
         ELSIF v_Montodepago = v_interes_calculado THEN
             UPDATE prestamo
             SET interespagado = v_interes_calculado,
@@ -518,12 +538,6 @@ BEGIN
                 fechamodificacion = sysdate,
                 fecha_pago = sysdate
             WHERE clienteID = v_cliente AND tipo_prestamoid=v_Tipo_Prestamo;
-            UPDATE sucursal
-            SET monto_prestamos = monto_prestamos - v_Montodepago
-            WHERE Cod_sucursal = v_Cod_sucursal;
-            UPDATE Sucursal_tipo_prestamo
-            SET monto_prestamos = monto_prestamos - v_Montodepago
-            WHERE Cod_sucursal = v_Cod_sucursal AND tipo_prestamoid = V_Tipo_Prestamo;
         END IF;
     UPDATE transacpagos
     SET Status='S'
@@ -535,7 +549,50 @@ EXCEPTION
       DBMS_OUTPUT.PUT_LINE('CURSOR YA ABIERTO.');
 END actualizacion_pago;
 /
+CREATE OR REPLACE TRIGGER carga_sucursal
+    AFTER UPDATE OR DELETE ON prestamo FOR EACH ROW
+    DECLARE
+    v_saldo_real       NUMBER(10);
+    v_interes_real     NUMBER(10);
+    BEGIN
+        IF UPDATING THEN    
+            v_interes_real:=ABS(:old.interespagado - :new.interespagado);
+            v_saldo_real:=ABS(:old.saldoactual - :new.saldoactual)+v_interes_real;
+            UPDATE sucursal
+            SET monto_prestamos = monto_prestamos - v_saldo_real
+            WHERE cod_sucursal = :old.cod_sucursal;
+            UPDATE Sucursal_tipo_prestamo
+            SET monto_prestamos = monto_prestamos - v_saldo_real
+            WHERE tipo_prestamoID = :old.tipo_prestamoID AND cod_sucursal = :old.cod_sucursal;
+            IF SQL%NOTFOUND THEN
+                INSERT INTO Sucursal_tipo_prestamo(cod_sucursal, tipo_prestamoid, monto_prestamos, cantidad)
+                VALUES (:new.cod_sucursal, :new.tipo_prestamoid, v_saldo_real, 1);
+            END IF;
+        ELSIF DELETING THEN
+            UPDATE sucursal
+            SET monto_prestamos = monto_prestamos - :old.monto_aprobado,
+                cantidad = cantidad - 1
+            WHERE cod_sucursal = :old.cod_sucursal;
+            UPDATE Sucursal_tipo_prestamo
+            SET monto_prestamos = monto_prestamos - :old.monto_aprobado,
+                cantidad = cantidad - 1
+            WHERE tipo_prestamoID = :old.tipo_prestamoID AND cod_sucursal = :old.cod_sucursal;
+        END IF;
+END carga_sucursal;
+/
 BEGIN
 actualizacion_pago;
 END;
 /
+
+
+
+
+
+
+
+
+
+
+
+
