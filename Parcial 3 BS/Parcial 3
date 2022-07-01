@@ -93,13 +93,13 @@ CREATE TABLE auditoria (
     id_transaccion      number (10) NOT NULL,
     Tabla               varchar2(100) NOT NULL,
     Tipo_operacion      char(1) NOT NULL,
-    clienteid           number (10) NOT NULL,
-    tipo_prestamoid     number (10) NOT NULL,
-    monto_aprobado      number(10) NOT NULL,
-    monto_del_pago      number (10) NOT NULL,
-    interespagado       number (10) NOT NULL,
-    saldo_anterior      number(10) NOT NULL,
-    saldo_final         number(10) NOT NULL,
+    clienteid           number (10),
+    tipo_prestamoid     number (10),
+    monto_aprobado      number(10),
+    monto_del_pago      number (10),
+    interespagado       number (10),
+    saldo_anterior      number(10),
+    saldo_final         number(10),
     usuario             varchar2 (50) NOT NULL,
     fecha               date NOT NULL,
     CONSTRAINT PK_id_transaccion2 PRIMARY KEY (id_transaccion),
@@ -584,8 +584,24 @@ BEGIN
 actualizacion_pago;
 END;
 /
-
-
+CREATE OR REPLACE TRIGGER tipo_prestamo_auditoria
+    AFTER INSERT OR UPDATE OR DELETE ON Sucursal_tipo_prestamo FOR EACH ROW
+    DECLARE
+    v_calculo     NUMBER(10);
+    BEGIN
+    v_calculo:= ABS(:old.monto_prestamos - :new.monto_prestamos);
+    IF INSERTING  THEN  
+        INSERT INTO auditoria (id_transaccion,tabla,Tipo_operacion,clienteid,tipo_prestamoid,monto_aprobado,monto_del_pago,interespagado,saldo_anterior,saldo_final,usuario,fecha)
+        VALUES (secuencia_auditoria.nextval , 'Sucursal_tipo_prestamo','I', null, :new.tipo_prestamoid, :new.monto_prestamos,0,0,0,:new.monto_prestamos, user, sysdate);
+    ELSIF UPDATING THEN
+        INSERT INTO auditoria (id_transaccion,tabla,Tipo_operacion,clienteid,tipo_prestamoid,monto_aprobado,monto_del_pago,interespagado,saldo_anterior,saldo_final,usuario,fecha)
+        VALUES (secuencia_auditoria.nextval , 'Sucursal_tipo_prestamo','U', null, :new.tipo_prestamoid, :old.monto_prestamos,v_calculo,null,:old.monto_prestamos,:new.monto_prestamos, user, sysdate);
+    ELSIF DELETING THEN
+        INSERT INTO auditoria (id_transaccion,tabla,Tipo_operacion,clienteid,tipo_prestamoid,monto_aprobado,monto_del_pago,interespagado,saldo_anterior,saldo_final,usuario,fecha)
+        VALUES (secuencia_auditoria.nextval , 'Sucursal_tipo_prestamo','D', null, :old.tipo_prestamoid, :old.monto_prestamos,null,null,:old.monto_prestamos,:old.monto_prestamos, user, sysdate);
+    END IF;
+END tipo_prestamo_auditoria;
+/
 
 
 
