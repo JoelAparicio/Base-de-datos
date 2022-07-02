@@ -615,23 +615,23 @@ BEGIN
     pago_corriente;
 END;
 /
-create or replace view ahorro_cliente as
-select c.id_cliente as "Codigo de cliente",c.nombre || ' ' ||c.apellido as "Cliente", t.descripcion as "Tipo de ahorro",a.fecha_de_apertura as "Fecha de apertura",
-a.saldo_del_ahorro as "Saldo del ahorro"
-from cliente c , ahorros a, tipo_de_ahorro t
-where t.id_tipo_ahorro = a.id_tipo_ahorro AND c.id_cliente = a.id_cliente
-order by c.id_cliente asc;
+CREATE OR REPLACE VIEW ahorro_cliente AS
+SELECT c.id_cliente AS "Codigo de cliente",c.nombre || ' ' ||c.apellido AS "Cliente", t.descripcion AS "Tipo de ahorro",a.fecha_de_apertura AS "Fecha de apertura",
+a.saldo_del_ahorro AS "Saldo del ahorro"
+FROM cliente c , ahorros a, tipo_de_ahorro t
+WHERE t.id_tipo_ahorro = a.id_tipo_ahorro AND c.id_cliente = a.id_cliente
+ORDER BY c.id_cliente ASC;
 /
-create or replace view cliente_sucursal as
-select c.id_cliente as "Codigo de cliente",c.nombre || ' ' ||c.apellido as "Cliente", t.descripcion as "Tipo de ahorro", s.nombre_sucursal as "Nombre sucursal"
-from cliente c, ahorros a, tipo_de_ahorro t , sucursal s
-where t.id_tipo_ahorro = a.id_tipo_ahorro AND c.id_cliente = a.id_cliente AND a.id_sucursal = s.id_sucursal   
-order by c.id_cliente asc; 
+CREATE OR REPLACE VIEW cliente_sucursal AS
+SELECT c.id_cliente AS "Codigo de cliente",c.nombre || ' ' ||c.apellido AS "Cliente", t.descripcion AS "Tipo de ahorro", s.nombre_sucursal AS "Nombre sucursal"
+FROM cliente c, ahorros a, tipo_de_ahorro t , sucursal s
+WHERE t.id_tipo_ahorro = a.id_tipo_ahorro AND c.id_cliente = a.id_cliente AND a.id_sucursal = s.id_sucursal   
+ORDER BY c.id_cliente ASC; 
 
-select * from ahorro_cliente;
-select * from cliente_sucursal;
+SELECT * FROM ahorro_cliente;
+SELECT * FROM cliente_sucursal;
 
 
 UPDATE ahorros
-SET saldo_del_ahorro = saldo_del_ahorro - 100
+SET saldo_del_ahorro = saldo_del_ahorro + 500
 WHERE numero_cuenta = 4;
