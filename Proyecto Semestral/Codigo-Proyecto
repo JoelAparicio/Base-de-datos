@@ -1275,8 +1275,23 @@ BEGIN
     ins_estadistica_jugador_p(11,5,0,0,0,91);
 END;
 /
-
-
+CREATE OR REPLACE VIEW info_jugador AS
+select j.nombre || ' ' ||j.apellido AS "Jugador",j.nro_camisa AS "Numero de camiseta",e.nombre AS "Nombre del equipo"
+from jugador j, equipo e
+where j.id_equipo = e.id_equipo;
+CREATE OR REPLACE VIEW local AS
+select p.id_partido ,e.nombre,p.lugar,p.fecha
+from equipo e, partido p
+where p.id_equipoa=e.id_equipo;
+CREATE OR REPLACE VIEW visitante AS
+select p.id_partido,e.nombre,p.lugar,p.fecha
+from equipo e, partido p
+where p.id_equipob=e.id_equipo;
+CREATE OR REPLACE VIEW enfrentamientos AS
+select v.id_partido as "Codigo partido",l.nombre as "Equipo local",v.nombre as "Equipo visitante",v.lugar as "Estadio",v.fecha as "Fecha",a.ganador as "Ganador"
+from local l, visitante v,estadistica_partido a
+where l.id_partido = v.id_partido and a.id_partido=v.id_partido
+order by v.fecha;
 
 
 
