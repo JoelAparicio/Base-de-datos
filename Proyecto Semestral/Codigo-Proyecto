@@ -2,25 +2,6 @@ CREATE TABLE tipo_arbitro (
     id_tipo_arbitro        NUMBER(10) NOT NULL,
     descripcion            VARCHAR2(40) NOT NULL,
 CONSTRAINT id_tipo_arbitro_pk PRIMARY KEY (id_tipo_arbitro));
-
-CREATE TABLE partido (
-    id_partido             NUMBER(10) NOT NULL,
-    id_equipoA             NUMBER(10) NOT NULL,
-    id_equipoB             NUMBER(10) NOT NULL,
-    lugar                  VARCHAR2(50) NOT NULL,
-    fecha                  DATE NOT NULL,
-CONSTRAINT id_partido_pk PRIMARY KEY (id_partido));
-
-CREATE TABLE puesto (
-    id_puesto              NUMBER(10) NOT NULL,
-    posicion               VARCHAR2(40) NOT NULL,
-CONSTRAINT id_puesto_pk PRIMARY KEY (id_puesto));
-
-CREATE TABLE equipo (
-    id_equipo              NUMBER(10) NOT NULL,
-    nombre                 VARCHAR2(60) NOT NULL,
-CONSTRAINT id_equipo_pk PRIMARY KEY (id_equipo));
-
 CREATE TABLE arbitro (
     id_arbitro             NUMBER(10) NOT NULL,
     nombre                 VARCHAR2(60) NOT NULL,
@@ -28,7 +9,22 @@ CREATE TABLE arbitro (
     fecha_nacimiento       DATE NOT NULL,
     edad                   NUMBER(3) NOT NULL,
 CONSTRAINT id_arbitro_pk PRIMARY KEY (id_arbitro));
-
+CREATE TABLE partido (
+    id_partido             NUMBER(10) NOT NULL,
+    id_equipoA             NUMBER(10) NOT NULL,
+    id_equipoB             NUMBER(10) NOT NULL,
+    lugar                  VARCHAR2(50) NOT NULL,
+    fecha                  DATE NOT NULL,
+CONSTRAINT id_partido_pk PRIMARY KEY (id_partido));
+CREATE TABLE puesto (
+    id_puesto              NUMBER(10) NOT NULL,
+    posicion               VARCHAR2(40) NOT NULL,
+CONSTRAINT id_puesto_pk PRIMARY KEY (id_puesto));
+CREATE TABLE equipo (
+    id_equipo              NUMBER(10) NOT NULL,
+    nombre                 VARCHAR2(60) NOT NULL,
+CONSTRAINT id_equipo_pk PRIMARY KEY (id_equipo));
+---------------------------------------------------------------------TABLAS PARAMETRICAS FIN--------------------------------------------
 CREATE TABLE arbitro_partido (
     id_arbitro             NUMBER(10) NOT NULL,
     id_partido             NUMBER(10) NOT NULL,
@@ -39,35 +35,6 @@ CONSTRAINT id_arbitro|id_partido_pk PRIMARY KEY (id_arbitro,id_partido),
 CONSTRAINT id_arbitro_fk FOREIGN KEY (id_arbitro) REFERENCES arbitro(id_arbitro),
 CONSTRAINT id_partido_fk FOREIGN KEY (id_partido) REFERENCES partido(id_partido),
 CONSTRAINT id_tipo_arbitro_fk FOREIGN KEY (id_tipo_arbitro) REFERENCES tipo_arbitro(id_tipo_arbitro));
-
-CREATE TABLE estadistica_partido (
-    id_estadistica_partido NUMBER(10) NOT NULL,
-    id_partido             NUMBER(10) NOT NULL,
-    goles                  NUMBER(2),
-    tiempo_min             NUMBER(3),
-    ganador                VARCHAR2(50),
-    status                 CHAR(1) NOT NULL, --'F' FINALIZADO, 'I' INICIADO   
-CONSTRAINT id_estadistica_partido_pk PRIMARY KEY (id_estadistica_partido),
-CONSTRAINT id_partido_fk2 FOREIGN KEY (id_partido) REFERENCES partido(id_partido));
-
-CREATE TABLE estadistica_partido_equipo (
-    id_partido             NUMBER(10) NOT NULL,
-    id_equipo              NUMBER(10) NOT NULL,
-    goles                  NUMBER(2) NOT NULL,
-    resultado              VARCHAR(50) NOT NULL,
-CONSTRAINT id_equipo|id_partido_pk PRIMARY KEY (id_partido,id_equipo),
-CONSTRAINT id_equipo_fk FOREIGN KEY (id_equipo) REFERENCES equipo(id_equipo),
-CONSTRAINT id_partido_fk3 FOREIGN KEY (id_partido) REFERENCES partido(id_partido));
-
-CREATE TABLE estadistica_equipo (
-    id_estadistica_equipo  NUMBER(10) NOT NULL,
-    id_equipo              NUMBER(10) NOT NULL,
-    p_ganados              NUMBER(2) NOT NULL,
-    p_perdidos             NUMBER(3) NOT NULL,
-    p_empatados            VARCHAR2(50) NOT NULL, 
-CONSTRAINT id_estadistica_partido_pk PRIMARY KEY (id_estadistica_partido),
-CONSTRAINT id_equipo_fk2 FOREIGN KEY (id_equipo) REFERENCES equipo(id_equipo));
-
 CREATE TABLE jugador (
     id_jugador             NUMBER(10) NOT NULL,
     id_equipo              NUMBER(10) NOT NULL,
@@ -78,7 +45,6 @@ CREATE TABLE jugador (
     edad                   NUMBER(3) NOT NULL,
 CONSTRAINT id_jugador_pk PRIMARY KEY (id_jugador),
 CONSTRAINT id_equipo_fk3 FOREIGN KEY (id_equipo) REFERENCES equipo(id_equipo));
-
 CREATE TABLE estadistica_jugador (
     id_estadistica_jugador NUMBER(10) NOT NULL,
     id_jugador             NUMBER(10) NOT NULL,
@@ -87,8 +53,51 @@ CREATE TABLE estadistica_jugador (
     goles                  NUMBER(4) NOT NULL,
 CONSTRAINT id_estadistica_jugador_pk PRIMARY KEY (id_estadistica_jugador),
 CONSTRAINT id_jugador_fk2 FOREIGN KEY (id_jugador) REFERENCES jugadores(id_jugador));
-
 CREATE TABLE estadistica_jugador_partido (
-    
-CONSTRAINT id_estadistica_jugador_pk PRIMARY KEY (id_estadistica_jugador),
-CONSTRAINT id_jugador_fk2 FOREIGN KEY (id_jugador) REFERENCES jugadores(id_jugador));
+    id_jugador             NUMBER(10) NOT NULL,
+    id_partido             NUMBER(10) NOT NULL,
+    id_puesto              NUMBER(10) NOT NULL,
+    goles                  NUMBER(2) NOT NULL,
+    tarjetas_amarillas     NUMBER(1) NOT NULL,
+    tarjetas_rojas         NUMBER(1) NOT NULL,
+    tiempo_jugado          NUMBER(3) NOT NULL,
+CONSTRAINT id_jugador|id_partido_pk PRIMARY KEY (id_jugador,id_partido),
+CONSTRAINT id_puesto_fk FOREIGN KEY (id_puesto) REFERENCES puesto(id_puesto));
+CREATE TABLE estadistica_partido (
+    id_estadistica_partido NUMBER(10) NOT NULL,
+    id_partido             NUMBER(10) NOT NULL,
+    goles                  NUMBER(2),
+    tiempo_min             NUMBER(3),
+    ganador                VARCHAR2(50),
+    status                 CHAR(1) NOT NULL, --'F' FINALIZADO, 'I' INICIADO   
+CONSTRAINT id_estadistica_partido_pk PRIMARY KEY (id_estadistica_partido),
+CONSTRAINT id_partido_fk2 FOREIGN KEY (id_partido) REFERENCES partido(id_partido));
+CREATE TABLE estadistica_partido_equipo (
+    id_partido             NUMBER(10) NOT NULL,
+    id_equipo              NUMBER(10) NOT NULL,
+    goles                  NUMBER(2) NOT NULL,
+    resultado              VARCHAR(50) NOT NULL,
+CONSTRAINT id_equipo|id_partido_pk PRIMARY KEY (id_partido,id_equipo),
+CONSTRAINT id_equipo_fk FOREIGN KEY (id_equipo) REFERENCES equipo(id_equipo),
+CONSTRAINT id_partido_fk3 FOREIGN KEY (id_partido) REFERENCES partido(id_partido));
+CREATE TABLE estadistica_equipo (
+    id_estadistica_equipo  NUMBER(10) NOT NULL,
+    id_equipo              NUMBER(10) NOT NULL,
+    p_ganados              NUMBER(2) NOT NULL,
+    p_perdidos             NUMBER(3) NOT NULL,
+    p_empatados            VARCHAR2(50) NOT NULL, 
+CONSTRAINT id_estadistica_partido_pk PRIMARY KEY (id_estadistica_partido),
+CONSTRAINT id_equipo_fk2 FOREIGN KEY (id_equipo) REFERENCES equipo(id_equipo));
+
+DROP TABLE estadistica_jugador_partido;
+DROP TABLE estadistica_jugador;
+DROP TABLE jugador;
+DROP TABLE estadistica_equipo;
+DROP TABLE estadistica_partido_equipo;
+DROP TABLE estadistica_partido;
+DROP TABLE arbitro_partido;
+DROP TABLE arbitro;
+DROP TABLE equipo;
+DROP TABLE puesto;
+DROP TABLE partido;
+DROP TABLE tipo_arbitro;
