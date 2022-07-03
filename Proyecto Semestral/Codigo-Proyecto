@@ -118,6 +118,13 @@ CREATE SEQUENCE sec_jugador
 CREATE SEQUENCE sec_estadistica_jugador
    START WITH 1
    INCREMENT BY 1;
+CREATE SEQUENCE contprocedimiento2
+    START WITH 1
+    INCREMENT BY 1
+    MAXVALUE 11
+    MINVALUE 1
+    CACHE 10
+    CYCLE;
 CREATE OR REPLACE PROCEDURE insersion_tipo_arbitro(
     p_descripcion      IN      tipo_arbitro.descripcion%TYPE) AS
 BEGIN
@@ -653,6 +660,7 @@ END;
 BEGIN
     insersion_partido_equipo(2,4,2,'Perdedor');
 END;
+/
 BEGIN
     insersion_partido_equipo(4,1,2,'Ganador');
 END;
@@ -660,6 +668,7 @@ END;
 BEGIN
     insersion_partido_equipo(4,6,1,'Perdedor');
 END;
+/
 BEGIN
     insersion_partido_equipo(5,1,0,'Perdedor');
 END;
@@ -702,7 +711,7 @@ CURSOR c_actualizar IS
         SELECT id_equipo,resultado
         FROM estadistica_partido_equipo;
 BEGIN
- OPEN c_actualizar;
+    OPEN c_actualizar;
         LOOP
             FETCH c_actualizar INTO v_id_equipo,v_resultado;            
             EXIT WHEN c_actualizar%NOTFOUND;
@@ -720,7 +729,7 @@ BEGIN
                 WHERE id_equipo = v_id_equipo;
             END IF;
         END LOOP;
-        CLOSE c_actualizar;
+    CLOSE c_actualizar;
 END act_estadistica_equipo;
 /
 BEGIN
@@ -796,16 +805,26 @@ BEGIN
     insersion_arbitro_partido(3,5,5);
 END;
 /
-CREATE SEQUENCE contprocedimiento
-    START WITH 1
-    INCREMENT BY 1;
-CREATE SEQUENCE contprocedimiento2
-    START WITH 1
-    INCREMENT BY 1
-    MAXVALUE 11
-    MINVALUE 1
-    CYCLE;
+CREATE OR REPLACE TRIGGER act_esta_jugador_arbitro
+    AFTER INSERT ON estadistica_jugador_partido FOR EACH ROW
+    BEGIN
+        UPDATE estadistica_jugador
+        SET tarjetas_amarillas = tarjetas_amarillas + :new.tarjetas_amarillas,
+            tarjetas_rojas = tarjetas_rojas + :new.tarjetas_rojas,
+            goles = goles + :new.goles
+        WHERE id_jugador = :new.id_jugador;
+        IF SQL%NOTFOUND THEN
+            INSERT INTO estadistica_jugador (id_estadistica_jugador, id_jugador, tarjetas_amarillas, tarjetas_rojas, goles) 
+            VALUES (sec_estadistica_jugador.nextval , :new.id_jugador, :new.tarjetas_amarillas, :new.tarjetas_rojas, :new.goles);
+        END IF;
+        UPDATE arbitro_partido
+        SET tarjetas_amarillas = tarjetas_amarillas + :new.tarjetas_amarillas,
+            tarjetas_rojas = tarjetas_rojas + :new.tarjetas_rojas
+        WHERE id_partido = :new.id_partido;
+END act_esta_jugador_arbitro;
+/
 CREATE OR REPLACE PROCEDURE ins_estadistica_jugador_p(
+    p_id_jugador         IN          estadistica_jugador_partido.id_jugador%TYPE,
     p_id_partido         IN          estadistica_jugador_partido.id_partido%TYPE,
     p_goles              IN          estadistica_jugador_partido.goles%TYPE,
     p_tarjetas_amarillas IN          estadistica_jugador_partido.tarjetas_amarillas%TYPE,
@@ -813,456 +832,449 @@ CREATE OR REPLACE PROCEDURE ins_estadistica_jugador_p(
     p_tiempo             IN          estadistica_jugador_partido.tiempo_jugado%TYPE) AS
 BEGIN
     INSERT INTO estadistica_jugador_partido
-    VALUES(contprocedimiento.nextval,p_id_partido,contprocedimiento2.nextval,p_goles,p_tarjetas_amarillas,p_tarjetas_rojas,p_tiempo);
+    VALUES(p_id_jugador,p_id_partido,contprocedimiento2.nextval,p_goles,p_tarjetas_amarillas,p_tarjetas_rojas,p_tiempo);
 END ins_estadistica_jugador_p;
 /
--------------------------------------------------PARTIDO1----------------------------------------------------------
 BEGIN 
-    ins_estadistica_jugador_p(1,0,1,0,95);
+    ins_estadistica_jugador_p(56,1,0,1,0,95);
 END;
 /
 BEGIN 
-    ins_estadistica_jugador_p(1,0,0,0,95);
+    ins_estadistica_jugador_p(57,1,0,0,0,95);
 END;
 /
 BEGIN 
-    ins_estadistica_jugador_p(1,0,1,0,95);
+    ins_estadistica_jugador_p(58,1,0,1,0,95);
 END;
 /
 BEGIN 
-    ins_estadistica_jugador_p(1,0,1,0,95);
+    ins_estadistica_jugador_p(59,1,0,1,0,95);
 END;
 /
 BEGIN 
-    ins_estadistica_jugador_p(1,1,0,0,95);
+    ins_estadistica_jugador_p(60,1,0,0,0,95);
 END;
 /
 BEGIN 
-    ins_estadistica_jugador_p(1,2,0,0,95);
+    ins_estadistica_jugador_p(61,1,2,0,0,95);
 END;
 /
 BEGIN 
-    ins_estadistica_jugador_p(1,0,0,0,95);
+    ins_estadistica_jugador_p(62,1,0,0,0,95);
 END;
 /
 BEGIN 
-    ins_estadistica_jugador_p(1,1,0,0,95);
+    ins_estadistica_jugador_p(63,1,1,1,0,95);
 END;
 /
 BEGIN 
-    ins_estadistica_jugador_p(1,0,0,0,95);
+    ins_estadistica_jugador_p(64,1,0,0,0,95);
 END;
 /
 BEGIN 
-    ins_estadistica_jugador_p(1,0,1,0,95);
+    ins_estadistica_jugador_p(65,1,0,1,0,95);
 END;
 /
 BEGIN 
-    ins_estadistica_jugador_p(1,1,0,0,95);
+    ins_estadistica_jugador_p(66,1,0,0,1,95);
 END;
 /
-
 BEGIN 
-    ins_estadistica_jugador_p(1,0,0,0,95);
+    ins_estadistica_jugador_p(45,1,0,0,0,95);
 END;
 /
 BEGIN 
-    ins_estadistica_jugador_p(1,0,0,0,95);
+    ins_estadistica_jugador_p(46,1,0,0,0,95);
 END;
 /
 BEGIN 
-    ins_estadistica_jugador_p(1,0,0,0,95);
+    ins_estadistica_jugador_p(47,1,0,2,1,95);
 END;
 /
 BEGIN 
-    ins_estadistica_jugador_p(1,0,0,0,95);
+    ins_estadistica_jugador_p(48,1,0,0,0,95);
 END;
 /
 BEGIN 
-    ins_estadistica_jugador_p(1,0,0,0,95);
+    ins_estadistica_jugador_p(49,1,0,0,0,95);
 END;
 /
 BEGIN 
-    ins_estadistica_jugador_p(1,0,0,0,95);
+    ins_estadistica_jugador_p(50,1,0,1,0,95);
 END;
 /
 BEGIN 
-    ins_estadistica_jugador_p(1,0,0,0,95);
+    ins_estadistica_jugador_p(51,1,0,0,0,95);
 END;
 /
 BEGIN 
-    ins_estadistica_jugador_p(1,0,1,0,95);
+    ins_estadistica_jugador_p(52,1,0,1,0,95);
 END;
 /
 BEGIN 
-    ins_estadistica_jugador_p(1,0,1,0,95);
+    ins_estadistica_jugador_p(53,1,0,1,0,95);
 END;
 /
 BEGIN 
-    ins_estadistica_jugador_p(1,1,1,0,95);
+    ins_estadistica_jugador_p(54,1,0,1,0,95);
 END;
 /
 BEGIN 
-    ins_estadistica_jugador_p(1,1,1,0,95);
+    ins_estadistica_jugador_p(55,1,1,1,0,95);
 END;
 /
--------------------------------------------------PARTIDO2----------------------------------------------------------
 BEGIN 
-    ins_estadistica_jugador_p(2,0,1,0,95);
+    ins_estadistica_jugador_p(1,2,0,1,0,92);
 END;
 /
 BEGIN 
-    ins_estadistica_jugador_p(2,0,1,0,95);
+    ins_estadistica_jugador_p(2,2,0,1,0,92);
 END;
 /
 BEGIN 
-    ins_estadistica_jugador_p(2,0,1,0,95);
+    ins_estadistica_jugador_p(3,2,1,1,0,92);
 END;
 /
 BEGIN 
-    ins_estadistica_jugador_p(2,1,1,0,95);
+    ins_estadistica_jugador_p(4,2,1,1,0,92);
 END;
 /
 BEGIN 
-    ins_estadistica_jugador_p(2,0,1,0,95);
+    ins_estadistica_jugador_p(5,2,0,1,0,92);
 END;
 /
 BEGIN 
-    ins_estadistica_jugador_p(2,0,1,0,95);
+    ins_estadistica_jugador_p(6,2,0,1,0,92);
 END;
 /
 BEGIN 
-    ins_estadistica_jugador_p(2,0,1,0,95);
+    ins_estadistica_jugador_p(7,2,0,0,0,92);
 END;
 /
 BEGIN 
-    ins_estadistica_jugador_p(2,0,1,0,95);
+    ins_estadistica_jugador_p(8,2,2,0,0,92);
 END;
 /
 BEGIN 
-    ins_estadistica_jugador_p(2,0,1,0,95);
+    ins_estadistica_jugador_p(9,2,0,0,0,92);
 END;
 /
 BEGIN 
-    ins_estadistica_jugador_p(2,0,1,0,95);
+    ins_estadistica_jugador_p(10,2,1,0,0,92);
 END;
 /
 BEGIN 
-    ins_estadistica_jugador_p(2,0,1,0,95);
+    ins_estadistica_jugador_p(11,2,0,0,0,92);
 END;
 /
 BEGIN 
-    ins_estadistica_jugador_p(2,0,1,0,95);
+    ins_estadistica_jugador_p(12,2,0,0,0,92);
 END;
 /
 BEGIN 
-    ins_estadistica_jugador_p(2,0,1,0,95);
+    ins_estadistica_jugador_p(13,2,1,0,0,92);
 END;
 /
 BEGIN 
-    ins_estadistica_jugador_p(2,0,1,0,95);
+    ins_estadistica_jugador_p(14,2,0,0,0,92);
 END;
 /
 BEGIN 
-    ins_estadistica_jugador_p(2,1,1,0,95);
+    ins_estadistica_jugador_p(15,2,1,1,0,92);
 END;
 /
 BEGIN 
-    ins_estadistica_jugador_p(2,0,1,0,95);
+    ins_estadistica_jugador_p(16,2,0,0,0,92);
 END;
 /
 BEGIN 
-    ins_estadistica_jugador_p(2,0,1,0,95);
+    ins_estadistica_jugador_p(17,2,0,0,0,92);
 END;
 /
 BEGIN 
-    ins_estadistica_jugador_p(2,0,1,0,95);
+    ins_estadistica_jugador_p(18,2,0,0,0,92);
 END;
 /
 BEGIN 
-    ins_estadistica_jugador_p(2,0,1,0,95);
+    ins_estadistica_jugador_p(19,2,0,2,1,92);
 END;
 /
 BEGIN 
-    ins_estadistica_jugador_p(2,0,1,0,95);
+    ins_estadistica_jugador_p(20,2,0,1,0,92);
 END;
 /
 BEGIN 
-    ins_estadistica_jugador_p(2,0,1,0,95);
+    ins_estadistica_jugador_p(21,2,0,0,0,92);
 END;
 /
 BEGIN 
-    ins_estadistica_jugador_p(2,0,1,0,95);
+    ins_estadistica_jugador_p(22,2,0,1,0,92);
 END;
 /
--------------------------------------------------PARTIDO3----------------------------------------------------------
-BEGIN 
-    ins_estadistica_jugador_p(3,0,1,0,95);
+BEGIN
+    ins_estadistica_jugador_p(23,3,0,0,0,98);
 END;
 /
 BEGIN 
-    ins_estadistica_jugador_p(3,0,1,0,95);
+    ins_estadistica_jugador_p(24,3,0,1,0,98);
 END;
 /
 BEGIN 
-    ins_estadistica_jugador_p(3,0,1,0,95);
+    ins_estadistica_jugador_p(25,3,0,1,0,98);
 END;
 /
 BEGIN 
-    ins_estadistica_jugador_p(3,0,1,0,95);
+    ins_estadistica_jugador_p(26,3,0,0,0,98);
 END;
 /
 BEGIN 
-    ins_estadistica_jugador_p(3,0,1,0,95);
+    ins_estadistica_jugador_p(27,3,0,1,0,98);
 END;
 /
 BEGIN 
-    ins_estadistica_jugador_p(3,0,1,0,95);
+    ins_estadistica_jugador_p(28,3,0,0,0,98);
 END;
 /
 BEGIN 
-    ins_estadistica_jugador_p(3,0,1,0,95);
+    ins_estadistica_jugador_p(29,3,0,0,0,98);
 END;
 /
 BEGIN 
-    ins_estadistica_jugador_p(3,0,1,0,95);
+    ins_estadistica_jugador_p(30,3,0,0,0,98);
 END;
 /
 BEGIN 
-    ins_estadistica_jugador_p(3,0,1,0,95);
+    ins_estadistica_jugador_p(31,3,1,1,0,98);
 END;
 /
 BEGIN 
-    ins_estadistica_jugador_p(3,0,1,0,95);
+    ins_estadistica_jugador_p(32,3,0,0,0,98);
 END;
 /
 BEGIN 
-    ins_estadistica_jugador_p(3,0,1,0,95);
+    ins_estadistica_jugador_p(33,3,0,0,0,98);
 END;
 /
 BEGIN 
-    ins_estadistica_jugador_p(3,0,1,0,95);
+    ins_estadistica_jugador_p(56,3,0,0,0,98);
 END;
 /
 BEGIN 
-    ins_estadistica_jugador_p(3,0,1,0,95);
+    ins_estadistica_jugador_p(57,3,0,0,0,98);
 END;
 /
 BEGIN 
-    ins_estadistica_jugador_p(3,0,1,0,95);
+    ins_estadistica_jugador_p(58,3,0,1,0,98);
 END;
 /
 BEGIN 
-    ins_estadistica_jugador_p(3,0,1,0,95);
+    ins_estadistica_jugador_p(59,3,0,0,0,98);
 END;
 /
 BEGIN 
-    ins_estadistica_jugador_p(3,0,1,0,95);
+    ins_estadistica_jugador_p(60,3,0,1,0,98);
 END;
 /
 BEGIN 
-    ins_estadistica_jugador_p(3,0,1,0,95);
+    ins_estadistica_jugador_p(61,3,0,0,0,98);
 END;
 /
 BEGIN 
-    ins_estadistica_jugador_p(3,0,1,0,95);
+    ins_estadistica_jugador_p(62,3,0,0,0,98);
 END;
 /
 BEGIN 
-    ins_estadistica_jugador_p(3,0,1,0,95);
+    ins_estadistica_jugador_p(63,3,0,0,0,98);
 END;
 /
-BEGIN 
-    ins_estadistica_jugador_p(3,0,1,0,95);
+BEGIN
+    ins_estadistica_jugador_p(64,3,0,1,0,98);
 END;
 /
 BEGIN 
-    ins_estadistica_jugador_p(3,0,1,0,95);
+    ins_estadistica_jugador_p(65,3,0,2,1,98);
 END;
 /
 BEGIN 
-    ins_estadistica_jugador_p(3,0,1,0,95);
+    ins_estadistica_jugador_p(66,3,0,0,0,98);
 END;
 /
--------------------------------------------------PARTIDO4----------------------------------------------------------
 BEGIN 
-    ins_estadistica_jugador_p(4,0,1,0,95);
+    ins_estadistica_jugador_p(1,4,0,0,0,97);
 END;
 /
 BEGIN 
-    ins_estadistica_jugador_p(4,0,1,0,95);
+    ins_estadistica_jugador_p(2,4,0,1,0,97);
 END;
 /
 BEGIN 
-    ins_estadistica_jugador_p(4,0,1,0,95);
+    ins_estadistica_jugador_p(3,4,0,1,0,97);
 END;
 /
 BEGIN 
-    ins_estadistica_jugador_p(4,0,1,0,95);
+    ins_estadistica_jugador_p(4,4,0,0,0,97);
 END;
 /
 BEGIN 
-    ins_estadistica_jugador_p(4,0,1,0,95);
+    ins_estadistica_jugador_p(5,4,0,1,0,97);
 END;
 /
 BEGIN 
-    ins_estadistica_jugador_p(4,0,1,0,95);
+    ins_estadistica_jugador_p(6,4,0,0,0,97);
 END;
 /
 BEGIN 
-    ins_estadistica_jugador_p(4,0,1,0,95);
+    ins_estadistica_jugador_p(7,4,0,0,0,97);
 END;
 /
 BEGIN 
-    ins_estadistica_jugador_p(4,0,1,0,95);
+    ins_estadistica_jugador_p(8,4,1,1,0,97);
 END;
 /
 BEGIN 
-    ins_estadistica_jugador_p(4,0,1,0,95);
+    ins_estadistica_jugador_p(9,4,0,1,0,97);
 END;
 /
 BEGIN 
-    ins_estadistica_jugador_p(4,0,1,0,95);
+    ins_estadistica_jugador_p(10,4,1,0,0,97);
 END;
 /
 BEGIN 
-    ins_estadistica_jugador_p(4,0,1,0,95);
+    ins_estadistica_jugador_p(11,4,0,1,0,97);
 END;
 /
 BEGIN 
-    ins_estadistica_jugador_p(4,0,1,0,95);
+    ins_estadistica_jugador_p(34,4,0,1,0,97);
 END;
 /
 BEGIN 
-    ins_estadistica_jugador_p(4,0,1,0,95);
+    ins_estadistica_jugador_p(35,4,0,0,0,97);
 END;
 /
 BEGIN 
-    ins_estadistica_jugador_p(4,0,1,0,95);
+    ins_estadistica_jugador_p(36,4,0,0,0,97);
 END;
 /
 BEGIN 
-    ins_estadistica_jugador_p(4,0,1,0,95);
+    ins_estadistica_jugador_p(37,4,0,0,0,97);
 END;
 /
 BEGIN 
-    ins_estadistica_jugador_p(4,0,1,0,95);
+    ins_estadistica_jugador_p(38,4,0,1,0,97);
 END;
 /
 BEGIN 
-    ins_estadistica_jugador_p(4,0,1,0,95);
+    ins_estadistica_jugador_p(39,4,0,0,0,97);
 END;
 /
 BEGIN 
-    ins_estadistica_jugador_p(4,0,1,0,95);
+    ins_estadistica_jugador_p(40,4,0,0,0,97);
 END;
 /
 BEGIN 
-    ins_estadistica_jugador_p(4,0,1,0,95);
+    ins_estadistica_jugador_p(41,4,0,0,0,97);
 END;
 /
 BEGIN 
-    ins_estadistica_jugador_p(4,0,1,0,95);
+    ins_estadistica_jugador_p(42,4,1,0,0,97);
 END;
 /
 BEGIN 
-    ins_estadistica_jugador_p(4,0,1,0,95);
+    ins_estadistica_jugador_p(43,4,0,1,0,97);
 END;
 /
 BEGIN 
-    ins_estadistica_jugador_p(4,0,1,0,95);
+    ins_estadistica_jugador_p(44,4,0,1,0,97);
 END;
 /
--------------------------------------------------PARTIDO5----------------------------------------------------------
 BEGIN 
-    ins_estadistica_jugador_p(5,0,1,0,95);
+    ins_estadistica_jugador_p(23,5,0,0,0,91);
 END;
 /
 BEGIN 
-    ins_estadistica_jugador_p(5,0,1,0,95);
+    ins_estadistica_jugador_p(24,5,0,1,0,91);
 END;
 /
 BEGIN 
-    ins_estadistica_jugador_p(5,0,1,0,95);
+    ins_estadistica_jugador_p(25,5,0,0,0,91);
 END;
 /
 BEGIN 
-    ins_estadistica_jugador_p(5,0,1,0,95);
+    ins_estadistica_jugador_p(26,5,0,0,0,91);
 END;
 /
 BEGIN 
-    ins_estadistica_jugador_p(5,0,1,0,95);
+    ins_estadistica_jugador_p(27,5,0,2,1,91);
 END;
 /
 BEGIN 
-    ins_estadistica_jugador_p(5,0,1,0,95);
+    ins_estadistica_jugador_p(28,5,0,0,0,91);
 END;
 /
 BEGIN 
-    ins_estadistica_jugador_p(5,0,1,0,95);
+    ins_estadistica_jugador_p(29,5,0,1,0,91);
 END;
 /
 BEGIN 
-    ins_estadistica_jugador_p(5,0,1,0,95);
+    ins_estadistica_jugador_p(30,5,0,0,0,91);
 END;
 /
 BEGIN 
-    ins_estadistica_jugador_p(5,0,1,0,95);
+    ins_estadistica_jugador_p(31,5,1,0,0,91);
 END;
 /
 BEGIN 
-    ins_estadistica_jugador_p(5,0,1,0,95);
+    ins_estadistica_jugador_p(32,5,0,0,0,91);
 END;
 /
 BEGIN 
-    ins_estadistica_jugador_p(5,0,1,0,95);
+    ins_estadistica_jugador_p(33,5,0,0,0,91);
 END;
 /
 BEGIN 
-    ins_estadistica_jugador_p(5,0,1,0,95);
+    ins_estadistica_jugador_p(1,5,0,0,0,91);
 END;
 /
 BEGIN 
-    ins_estadistica_jugador_p(5,0,1,0,95);
+    ins_estadistica_jugador_p(2,5,0,0,0,91);
 END;
 /
 BEGIN 
-    ins_estadistica_jugador_p(5,0,1,0,95);
+    ins_estadistica_jugador_p(3,5,0,1,0,91);
 END;
 /
 BEGIN 
-    ins_estadistica_jugador_p(5,0,1,0,95);
+    ins_estadistica_jugador_p(4,5,0,0,0,91);
 END;
 /
 BEGIN 
-    ins_estadistica_jugador_p(5,0,1,0,95);
+    ins_estadistica_jugador_p(5,5,0,0,0,91);
 END;
 /
 BEGIN 
-    ins_estadistica_jugador_p(5,0,1,0,95);
+    ins_estadistica_jugador_p(6,5,0,2,1,91);
 END;
 /
 BEGIN 
-    ins_estadistica_jugador_p(5,0,1,0,95);
+    ins_estadistica_jugador_p(7,5,0,0,0,91);
 END;
 /
 BEGIN 
-    ins_estadistica_jugador_p(5,0,1,0,95);
+    ins_estadistica_jugador_p(8,5,0,2,1,91);
 END;
 /
 BEGIN 
-    ins_estadistica_jugador_p(5,0,1,0,95);
+    ins_estadistica_jugador_p(9,5,0,0,0,91);
 END;
 /
 BEGIN 
-    ins_estadistica_jugador_p(5,0,1,0,95);
+    ins_estadistica_jugador_p(10,5,0,1,0,91);
 END;
 /
 BEGIN 
-    ins_estadistica_jugador_p(5,0,1,0,95);
+    ins_estadistica_jugador_p(11,5,0,0,0,91);
 END;
 /
-
 
 
 
