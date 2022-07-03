@@ -124,6 +124,7 @@ BEGIN
     INSERT INTO tipo_arbitro
     VALUES(sec_tipo_arbitro.nextval,p_descripcion);
 END insersion_tipo_arbitro;
+/
 BEGIN
     insersion_tipo_arbitro('Arbitro principal');
 END;
@@ -618,6 +619,7 @@ CREATE OR REPLACE TRIGGER actualizacion_partido
             status = 'F'
         WHERE id_partido = :new.id_partido;
 END actualizacion_partido;
+/
 CREATE OR REPLACE PROCEDURE insersion_partido_equipo(
     p_id_partido              IN      estadistica_partido_equipo.id_partido%TYPE,
     p_id_equipo               IN      estadistica_partido_equipo.id_equipo%TYPE,
@@ -734,3 +736,63 @@ END;
 BEGIN
     insersion_arbitro_partido(3,5,5);
 END;
+/
+CREATE OR REPLACE PROCEDURE insersion_estadistica_equipo(
+    p_id_equipo          IN          estadistica_equipo.id_equipo%TYPE) AS
+BEGIN
+    INSERT INTO estadistica_equipo
+    VALUES (sec_estadistica_equipo.nextval,p_id_equipo,0,0,0);
+END insersion_estadistica_equipo;
+/
+BEGIN
+    insersion_estadistica_equipo(1);
+END;
+/
+BEGIN
+    insersion_estadistica_equipo(2);
+END;
+/
+BEGIN
+    insersion_estadistica_equipo(3);
+END;
+/
+BEGIN
+    insersion_estadistica_equipo(4);
+END;
+/
+BEGIN
+    insersion_estadistica_equipo(5);
+END;
+/
+CREATE OR REPLACE PROCEDURE act_estadistica_equipo  AS
+v_id_equipo     estadistica_partido_equipo.id_equipo%TYPE;
+v_resultado     estadistica_partido_equipo.resultado%TYPE;
+CURSOR c_actualizar IS
+        SELECT id_equipo,resultado
+        FROM estadistica_partido_equipo;
+BEGIN
+ OPEN c_actualizar;
+        LOOP
+            FETCH c_actualizar INTO v_id_equipo,v_resultado;            
+            EXIT WHEN c_actualizar%NOTFOUND;
+            IF v_resultado = 'Ganador' THEN
+                UPDATE estadistica_equipo
+                SET p_ganados = p_ganados + 1
+                WHERE id_equipo = v_id_equipo;
+            ELSIF v_resultado = 'Perdedor' THEN
+                UPDATE estadistica_equipo
+                SET p_perdidos = p_perdidos + 1
+                WHERE id_equipo = v_id_equipo;
+            ELSIF v_resultado = 'Empate' THEN
+                UPDATE estadistica_equipo
+                SET p_empatados = p_empatados + 1
+                WHERE id_equipo = v_id_equipo;
+            END IF;
+        END LOOP;
+        CLOSE c_actualizar;
+END act_estadistica_equipo;
+/
+BEGIN
+    act_estadistica_equipo;
+END;
+/
