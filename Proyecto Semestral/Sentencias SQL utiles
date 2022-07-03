@@ -1,0 +1,27 @@
+
+------------------------------------BORRADO DE TABLAS------------------------------------
+
+DROP TABLE estadistica_jugador_partido;
+DROP TABLE estadistica_jugador;
+DROP TABLE jugador;
+DROP TABLE estadistica_equipo;
+DROP TABLE estadistica_partido_equipo;
+DROP TABLE estadistica_partido;
+DROP TABLE arbitro_partido;
+DROP TABLE arbitro;
+DROP TABLE equipo;
+DROP TABLE puesto;
+DROP TABLE partido;
+DROP TABLE tipo_arbitro;
+
+------------------------------------BORRADO DE SECUENCIAS------------------------------------
+
+DROP SEQUENCE sec_puesto;
+DROP SEQUENCE sec_tipo_arbitro;
+DROP SEQUENCE sec_arbitro;
+DROP SEQUENCE sec_partido;
+DROP SEQUENCE sec_estadistica_partido;
+DROP SEQUENCE sec_equipo;
+DROP SEQUENCE sec_estadistica_equipo;
+DROP SEQUENCE sec_jugador;
+DROP SEQUENCE sec_estadistica_jugador;

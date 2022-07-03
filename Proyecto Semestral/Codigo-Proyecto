@@ -9,13 +9,6 @@ CREATE TABLE arbitro (
     fecha_nacimiento       DATE NOT NULL,
     edad                   NUMBER(3) NOT NULL,
 CONSTRAINT id_arbitro_pk PRIMARY KEY (id_arbitro));
-CREATE TABLE partido (
-    id_partido             NUMBER(10) NOT NULL,
-    id_equipoA             NUMBER(10) NOT NULL,
-    id_equipoB             NUMBER(10) NOT NULL,
-    lugar                  VARCHAR2(50) NOT NULL,
-    fecha                  DATE NOT NULL,
-CONSTRAINT id_partido_pk PRIMARY KEY (id_partido));
 CREATE TABLE puesto (
     id_puesto              NUMBER(10) NOT NULL,
     posicion               VARCHAR2(40) NOT NULL,
@@ -24,16 +17,24 @@ CREATE TABLE equipo (
     id_equipo              NUMBER(10) NOT NULL,
     nombre                 VARCHAR2(60) NOT NULL,
 CONSTRAINT id_equipo_pk PRIMARY KEY (id_equipo));
----------------------------------------------------------------------TABLAS PARAMETRICAS FIN--------------------------------------------
+CREATE TABLE partido (
+    id_partido             NUMBER(10) NOT NULL,
+    id_equipoA             NUMBER(10) NOT NULL,
+    id_equipoB             NUMBER(10) NOT NULL,
+    lugar                  VARCHAR2(50) NOT NULL,
+    fecha                  DATE NOT NULL,
+CONSTRAINT id_partido_pk PRIMARY KEY (id_partido),
+CONSTRAINT id_equipoAfk FOREIGN KEY (id_equipoA) REFERENCES equipo(id_equipo),
+CONSTRAINT id_equipoBfk FOREIGN KEY (id_equipoB) REFERENCES equipo(id_equipo));
 CREATE TABLE arbitro_partido (
     id_arbitro             NUMBER(10) NOT NULL,
     id_partido             NUMBER(10) NOT NULL,
     id_tipo_arbitro        NUMBER(10) NOT NULL,
     tarjetas_amarillas     NUMBER(2) NOT NULL,
     tarjetas_rojas         NUMBER(2) NOT NULL,
-CONSTRAINT id_arbitro|id_partido_pk PRIMARY KEY (id_arbitro,id_partido),
+CONSTRAINT id_arbitro_id_partido_pk PRIMARY KEY (id_arbitro,id_partido),
 CONSTRAINT id_arbitro_fk FOREIGN KEY (id_arbitro) REFERENCES arbitro(id_arbitro),
-CONSTRAINT id_partido_fk FOREIGN KEY (id_partido) REFERENCES partido(id_partido),
+CONSTRAINT id_partido_fk1 FOREIGN KEY (id_partido) REFERENCES partido(id_partido),
 CONSTRAINT id_tipo_arbitro_fk FOREIGN KEY (id_tipo_arbitro) REFERENCES tipo_arbitro(id_tipo_arbitro));
 CREATE TABLE jugador (
     id_jugador             NUMBER(10) NOT NULL,
@@ -52,7 +53,7 @@ CREATE TABLE estadistica_jugador (
     tarjetas_rojas         NUMBER(2) NOT NULL,
     goles                  NUMBER(4) NOT NULL,
 CONSTRAINT id_estadistica_jugador_pk PRIMARY KEY (id_estadistica_jugador),
-CONSTRAINT id_jugador_fk2 FOREIGN KEY (id_jugador) REFERENCES jugadores(id_jugador));
+CONSTRAINT id_jugador_fk2 FOREIGN KEY (id_jugador) REFERENCES jugador(id_jugador));
 CREATE TABLE estadistica_jugador_partido (
     id_jugador             NUMBER(10) NOT NULL,
     id_partido             NUMBER(10) NOT NULL,
@@ -61,8 +62,10 @@ CREATE TABLE estadistica_jugador_partido (
     tarjetas_amarillas     NUMBER(1) NOT NULL,
     tarjetas_rojas         NUMBER(1) NOT NULL,
     tiempo_jugado          NUMBER(3) NOT NULL,
-CONSTRAINT id_jugador|id_partido_pk PRIMARY KEY (id_jugador,id_partido),
-CONSTRAINT id_puesto_fk FOREIGN KEY (id_puesto) REFERENCES puesto(id_puesto));
+CONSTRAINT id_jugador_id_partido_pk PRIMARY KEY (id_jugador,id_partido),
+CONSTRAINT id_puesto_fk FOREIGN KEY (id_puesto) REFERENCES puesto(id_puesto),
+CONSTRAINT id_jugador_fk FOREIGN KEY (id_jugador) REFERENCES jugador(id_jugador),
+CONSTRAINT id_partido_fk FOREIGN KEY (id_partido) REFERENCES partido(id_partido));
 CREATE TABLE estadistica_partido (
     id_estadistica_partido NUMBER(10) NOT NULL,
     id_partido             NUMBER(10) NOT NULL,
@@ -77,7 +80,7 @@ CREATE TABLE estadistica_partido_equipo (
     id_equipo              NUMBER(10) NOT NULL,
     goles                  NUMBER(2) NOT NULL,
     resultado              VARCHAR(50) NOT NULL,
-CONSTRAINT id_equipo|id_partido_pk PRIMARY KEY (id_partido,id_equipo),
+CONSTRAINT id_equipo_id_partido_pk PRIMARY KEY (id_partido,id_equipo),
 CONSTRAINT id_equipo_fk FOREIGN KEY (id_equipo) REFERENCES equipo(id_equipo),
 CONSTRAINT id_partido_fk3 FOREIGN KEY (id_partido) REFERENCES partido(id_partido));
 CREATE TABLE estadistica_equipo (
@@ -86,18 +89,452 @@ CREATE TABLE estadistica_equipo (
     p_ganados              NUMBER(2) NOT NULL,
     p_perdidos             NUMBER(3) NOT NULL,
     p_empatados            VARCHAR2(50) NOT NULL, 
-CONSTRAINT id_estadistica_partido_pk PRIMARY KEY (id_estadistica_partido),
+CONSTRAINT id_estadistica_equipo_pk PRIMARY KEY (id_estadistica_equipo),
 CONSTRAINT id_equipo_fk2 FOREIGN KEY (id_equipo) REFERENCES equipo(id_equipo));
-
-DROP TABLE estadistica_jugador_partido;
-DROP TABLE estadistica_jugador;
-DROP TABLE jugador;
-DROP TABLE estadistica_equipo;
-DROP TABLE estadistica_partido_equipo;
-DROP TABLE estadistica_partido;
-DROP TABLE arbitro_partido;
-DROP TABLE arbitro;
-DROP TABLE equipo;
-DROP TABLE puesto;
-DROP TABLE partido;
-DROP TABLE tipo_arbitro;
+CREATE SEQUENCE sec_puesto
+   START WITH 1
+   INCREMENT BY 1;
+CREATE SEQUENCE sec_tipo_arbitro
+   START WITH 1
+   INCREMENT BY 1;
+CREATE SEQUENCE sec_arbitro
+   START WITH 1
+   INCREMENT BY 1;
+CREATE SEQUENCE sec_partido
+   START WITH 1
+   INCREMENT BY 1;
+CREATE SEQUENCE sec_estadistica_partido
+   START WITH 1
+   INCREMENT BY 1;
+CREATE SEQUENCE sec_equipo
+   START WITH 1
+   INCREMENT BY 1;
+CREATE SEQUENCE sec_estadistica_equipo
+   START WITH 1
+   INCREMENT BY 1;
+CREATE SEQUENCE sec_jugador
+   START WITH 1
+   INCREMENT BY 1;
+CREATE SEQUENCE sec_estadistica_jugador
+   START WITH 1
+   INCREMENT BY 1;
+CREATE OR REPLACE PROCEDURE insersion_tipo_arbitro(
+    p_descripcion      IN      tipo_arbitro.descripcion%TYPE) AS
+BEGIN
+    INSERT INTO tipo_arbitro
+    VALUES(sec_tipo_arbitro.nextval,p_descripcion);
+END insersion_tipo_arbitro;
+BEGIN
+    insersion_tipo_arbitro('Arbitro principal');
+END;
+/
+BEGIN
+    insersion_tipo_arbitro('Arbitro asistente');
+END;
+/
+BEGIN
+    insersion_tipo_arbitro('Arbitro suplente');
+END;
+/
+BEGIN
+    insersion_tipo_arbitro('Arbitro cuarto');
+END;
+/
+BEGIN
+    insersion_tipo_arbitro('Arbitro video');
+END;
+/
+CREATE OR REPLACE FUNCTION calcular_edad(p_calculo_edad IN arbitro.fecha_nacimiento%TYPE) 
+    RETURN NUMBER
+    AS
+    v_edad NUMBER;
+    BEGIN
+    SELECT FLOOR(months_between(sysdate,p_calculo_edad)/12) INTO v_edad FROM dual;
+    RETURN v_edad;
+END calcular_edad;
+/
+CREATE OR REPLACE PROCEDURE insersion_arbitro(
+    p_nombre                IN      arbitro.nombre%TYPE,
+    p_apellido              IN      arbitro.apellido%TYPE,
+    p_fecha_nacimiento      IN      arbitro.fecha_nacimiento%TYPE) AS
+BEGIN
+    INSERT INTO arbitro
+    VALUES(sec_arbitro.nextval,p_nombre,p_apellido,p_fecha_nacimiento,calcular_edad(p_fecha_nacimiento));
+END insersion_arbitro;
+/
+BEGIN
+    insersion_arbitro('Juan','Jaramillo',TO_DATE('23/03/1994','DD/MM/YYYY'));
+END;
+/
+BEGIN
+    insersion_arbitro('Mario','Sunshine',TO_DATE('25/04/1984','DD/MM/YYYY'));
+END;
+/
+BEGIN
+    insersion_arbitro('Benito','Carrasquillo',TO_DATE('02/11/1999','DD/MM/YYYY'));
+END;
+/
+BEGIN
+    insersion_arbitro('Pablo','Pucca',TO_DATE('24/06/1986','DD/MM/YYYY'));
+END;
+/
+BEGIN
+    insersion_arbitro('Mike','Torres',TO_DATE('01/03/1981','DD/MM/YYYY'));
+END;
+/
+CREATE OR REPLACE PROCEDURE insersion_puesto(
+    p_posicion                IN      puesto.posicion%TYPE) AS
+BEGIN
+    INSERT INTO puesto
+    VALUES(sec_puesto.nextval,p_posicion);
+END insersion_puesto;
+/
+BEGIN
+    insersion_puesto('Portero');
+END;
+/
+BEGIN
+    insersion_puesto('Defensa central');
+END;
+/
+BEGIN
+    insersion_puesto('Defensa lateral derecho');
+END;
+/
+BEGIN
+    insersion_puesto('Defensa lateral izquierdo');
+END;
+/
+BEGIN
+    insersion_puesto('Mediocentro');
+END;
+/
+BEGIN
+    insersion_puesto('Mediocentro defensivo');
+END;
+/
+BEGIN
+    insersion_puesto('Interior derecho');
+END;
+/
+BEGIN
+    insersion_puesto('Interior izquierdo');
+END;
+/
+BEGIN
+    insersion_puesto('Delantero centro');
+END;
+/
+BEGIN
+    insersion_puesto('Delantero punta');
+END;
+/
+BEGIN
+    insersion_puesto('Delantero extremo');
+END;
+/
+CREATE OR REPLACE PROCEDURE insersion_equipos(
+    p_nombre                IN      equipo.nombre%TYPE) AS
+BEGIN
+    INSERT INTO equipo
+    VALUES(sec_equipo.nextval,p_nombre);
+END insersion_equipos;
+/
+BEGIN
+    insersion_equipos('The Grand Androids');
+END;
+/
+BEGIN
+    insersion_equipos('The Wild Jackals');
+END;
+/
+BEGIN
+    insersion_equipos('The Lemurs');
+END;
+/
+BEGIN
+    insersion_equipos('The Silent Rockets');
+END;
+/
+BEGIN
+    insersion_equipos('The Grim Raccoons');
+END;
+/
+BEGIN
+    insersion_equipos('The Valiant');
+END;
+/
+CREATE OR REPLACE PROCEDURE insersion_jugadores(
+    p_equipo                IN      jugador.id_equipo%TYPE,
+    p_nombre                IN      jugador.nombre%TYPE,
+    p_apellido              IN      jugador.apellido%TYPE) AS
+    v_fecha DATE := to_date('01/01/1970', 'dd/mm/yyyy')+trunc(dbms_random.value(1,11680));
+BEGIN
+    INSERT INTO jugador
+    VALUES(sec_jugador.nextval,p_equipo,p_nombre,p_apellido,trunc(DBMS_RANDOM.VALUE(1,99)),v_fecha,calcular_edad(v_fecha));
+END insersion_jugadores;
+/
+BEGIN
+    insersion_jugadores(1,'Jose','Guirado');
+END;
+/
+BEGIN
+    insersion_jugadores(1,'Maximo','Prados');
+END;
+/
+BEGIN
+    insersion_jugadores(1,'Norberto','Manrique');
+END;
+/
+BEGIN
+    insersion_jugadores(1,'Federico','Hidalgo');
+END;
+/
+BEGIN
+    insersion_jugadores(1,'Raul','Acevedo');
+END;
+/
+BEGIN
+    insersion_jugadores(1,'Federico','Pineda');
+END;
+/
+BEGIN
+    insersion_jugadores(1,'Pedro','Mendez');
+END;
+/
+BEGIN
+    insersion_jugadores(1,'Juan','Prats');
+END;
+/
+BEGIN
+    insersion_jugadores(1,'Omar','Toribio');
+END;
+/
+BEGIN
+    insersion_jugadores(1,'Mario','Peña');
+END;
+/
+BEGIN
+    insersion_jugadores(1,'Abderrahim','Pineda');
+END;
+/
+BEGIN
+    insersion_jugadores(4,'Mohammed','Campoy');
+END;
+/
+BEGIN
+    insersion_jugadores(4,'Anselmo','del Valle');
+END;
+/
+BEGIN
+    insersion_jugadores(4,'Marcial','De-La-Torre');
+END;
+/
+BEGIN
+    insersion_jugadores(4,'Unax','Alarcon');
+END;
+/
+BEGIN
+    insersion_jugadores(4,'Carlos','Kaur');
+END;
+/
+BEGIN
+    insersion_jugadores(4,'Manuel','Cardenas');
+END;
+/
+BEGIN
+    insersion_jugadores(4,'Luis','Valverde');
+END;
+/
+BEGIN
+    insersion_jugadores(4,'Miquel','Toledano');
+END;
+/
+BEGIN
+    insersion_jugadores(4,'Abdelkader','Barbera');
+END;
+/
+BEGIN
+    insersion_jugadores(4,'Dylan','Jimenez');
+END;
+/
+BEGIN
+    insersion_jugadores(4,'Serafin','Campillo');
+END;
+/
+BEGIN
+    insersion_jugadores(3,'Cayetano','Pina');
+END;
+/
+BEGIN
+    insersion_jugadores(3,'Alexandre','Manzanares');
+END;
+/
+BEGIN
+    insersion_jugadores(3,'Jose','Guijarro');
+END;
+/
+BEGIN
+    insersion_jugadores(3,'Aleix','Souto');
+END;
+/
+BEGIN
+    insersion_jugadores(3,'Raimundo','Cerda');
+END;
+/
+BEGIN
+    insersion_jugadores(3,'Antonio','de Diego');
+END;
+/
+BEGIN
+    insersion_jugadores(3,'Mariano','Martos');
+END;
+/
+BEGIN
+    insersion_jugadores(3,'Jose','Oviedo');
+END;
+/
+BEGIN
+    insersion_jugadores(3,'Antonio','Canales');
+END;
+/
+BEGIN
+    insersion_jugadores(3,'Angel','González');
+END;
+/
+BEGIN
+    insersion_jugadores(3,'Juan','Marti');
+END;
+/
+BEGIN
+    insersion_jugadores(6,'Bruno','Segura');
+END;
+/
+BEGIN
+    insersion_jugadores(6,'Juan','Zafra');
+END;
+/
+BEGIN
+    insersion_jugadores(6,'Khalid','Cordon');
+END;
+/
+BEGIN
+    insersion_jugadores(6,'Baltasar','Alvarez');
+END;
+/
+BEGIN
+    insersion_jugadores(6,'Rachid','Barbera');
+END;
+/
+BEGIN
+    insersion_jugadores(6,'Ricard','Murcia');
+END;
+/
+BEGIN
+    insersion_jugadores(6,'Gumersindo ','Peinado');
+END;
+/
+BEGIN
+    insersion_jugadores(6,'Alejandro','Piqueras');
+END;
+/
+BEGIN
+    insersion_jugadores(6,'Luis ','Amor');
+END;
+/
+BEGIN
+    insersion_jugadores(6,'Sergi ','Ballesteros');
+END;
+/
+BEGIN
+    insersion_jugadores(6,'Ignasi','Torrejon');
+END;
+/
+BEGIN
+    insersion_jugadores(2,'Juan','Maestre');
+END;
+/
+BEGIN
+    insersion_jugadores(2,'Rafael','Mohamed');
+END;
+/
+BEGIN
+    insersion_jugadores(2,'Carlos','Galindo');
+END;
+/
+BEGIN
+    insersion_jugadores(2,'Manel','Manel');
+END;
+/
+BEGIN
+    insersion_jugadores(2,'Alfredo','Postigo');
+END;
+/
+BEGIN
+    insersion_jugadores(2,'Lazaro','Crespo');
+END;
+/
+BEGIN
+    insersion_jugadores(2,'Hamid','Medrano');
+END;
+/
+BEGIN
+    insersion_jugadores(2,'Jesus','Iniesta');
+END;
+/
+BEGIN
+    insersion_jugadores(2,'Alexis','Rodriguez');
+END;
+/
+BEGIN
+    insersion_jugadores(2,'Basilio','Arce');
+END;
+/
+BEGIN
+    insersion_jugadores(2,'Arnau','Ballesteros');
+END;
+/
+BEGIN
+    insersion_jugadores(5,'Cipriano','Caro');
+END;
+/
+BEGIN
+    insersion_jugadores(5,'Angel','Casals');
+END;
+/
+BEGIN
+    insersion_jugadores(5,'Anastasio','Villegas');
+END;
+/
+BEGIN
+    insersion_jugadores(5,'Celestino','Gracia');
+END;
+/
+BEGIN
+    insersion_jugadores(5,'Oriol','Montoro');
+END;
+/
+BEGIN
+    insersion_jugadores(5,'Eulogio','Quevedo');
+END;
+/
+BEGIN
+    insersion_jugadores(5,'Jose','Mera');
+END;
+/
+BEGIN
+    insersion_jugadores(5,'Angel','Carreño');
+END;
+/
+BEGIN
+    insersion_jugadores(5,'Brahim','Roman');
+END;
+/
+BEGIN
+    insersion_jugadores(5,'Sergi','Campo');
+END;
+/
+BEGIN
+    insersion_jugadores(5,'Isaac','Castilla');
+END;
+/
