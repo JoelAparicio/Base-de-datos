@@ -130,6 +130,15 @@ CREATE OR REPLACE PROCEDURE insersion_tipo_arbitro(
 BEGIN
     INSERT INTO tipo_arbitro
     VALUES(sec_tipo_arbitro.nextval,p_descripcion);
+EXCEPTION
+    WHEN DUP_VAL_ON_INDEX THEN
+        DBMS_OUTPUT.PUT_LINE('INSERCION DUPLICADA');
+    WHEN STORAGE_ERROR THEN
+        DBMS_OUTPUT.PUT_LINE('MEMORIA INSUFICIENTE');
+    WHEN PROGRAM_ERROR THEN
+        DBMS_OUTPUT.PUT_LINE('PL/SQL TIENE UN PROBLEMA INTERNO');
+    WHEN NO_DATA_FOUND THEN
+        DBMS_OUTPUT.PUT_LINE('SELECT NO RETORNA DATOS');
 END insersion_tipo_arbitro;
 /
 BEGIN
@@ -168,6 +177,15 @@ CREATE OR REPLACE PROCEDURE insersion_arbitro(
 BEGIN
     INSERT INTO arbitro
     VALUES(sec_arbitro.nextval,p_nombre,p_apellido,p_fecha_nacimiento,calcular_edad(p_fecha_nacimiento));
+EXCEPTION
+    WHEN DUP_VAL_ON_INDEX THEN
+        DBMS_OUTPUT.PUT_LINE('INSERCION DUPLICADA');
+    WHEN STORAGE_ERROR THEN
+        DBMS_OUTPUT.PUT_LINE('MEMORIA INSUFICIENTE');
+    WHEN PROGRAM_ERROR THEN
+        DBMS_OUTPUT.PUT_LINE('PL/SQL TIENE UN PROBLEMA INTERNO');
+    WHEN NO_DATA_FOUND THEN
+        DBMS_OUTPUT.PUT_LINE('SELECT NO RETORNA DATOS');
 END insersion_arbitro;
 /
 BEGIN
@@ -195,6 +213,15 @@ CREATE OR REPLACE PROCEDURE insersion_puesto(
 BEGIN
     INSERT INTO puesto
     VALUES(sec_puesto.nextval,p_posicion);
+EXCEPTION
+    WHEN DUP_VAL_ON_INDEX THEN
+        DBMS_OUTPUT.PUT_LINE('INSERCION DUPLICADA');
+    WHEN STORAGE_ERROR THEN
+        DBMS_OUTPUT.PUT_LINE('MEMORIA INSUFICIENTE.');
+    WHEN PROGRAM_ERROR THEN
+        DBMS_OUTPUT.PUT_LINE('PL/SQL TIENE UN PROBLEMA INTERNO');
+    WHEN NO_DATA_FOUND THEN
+        DBMS_OUTPUT.PUT_LINE('SELECT NO RETORNA DATOS');
 END insersion_puesto;
 /
 BEGIN
@@ -246,6 +273,15 @@ CREATE OR REPLACE PROCEDURE insersion_equipos(
 BEGIN
     INSERT INTO equipo
     VALUES(sec_equipo.nextval,p_nombre);
+EXCEPTION
+    WHEN DUP_VAL_ON_INDEX THEN
+        DBMS_OUTPUT.PUT_LINE('INSERCION DUPLICADA');
+    WHEN STORAGE_ERROR THEN
+        DBMS_OUTPUT.PUT_LINE('MEMORIA INSUFICIENTE');
+    WHEN PROGRAM_ERROR THEN
+        DBMS_OUTPUT.PUT_LINE('PL/SQL TIENE UN PROBLEMA INTERNO');
+    WHEN NO_DATA_FOUND THEN
+        DBMS_OUTPUT.PUT_LINE('SELECT NO RETORNA DATOS');
 END insersion_equipos;
 /
 BEGIN
@@ -280,6 +316,15 @@ CREATE OR REPLACE PROCEDURE insersion_jugadores(
 BEGIN
     INSERT INTO jugador
     VALUES(sec_jugador.nextval,p_equipo,p_nombre,p_apellido,trunc(DBMS_RANDOM.VALUE(1,99)),v_fecha,calcular_edad(v_fecha));
+EXCEPTION
+    WHEN DUP_VAL_ON_INDEX THEN
+        DBMS_OUTPUT.PUT_LINE('INSERCION DUPLICADA');
+    WHEN STORAGE_ERROR THEN
+        DBMS_OUTPUT.PUT_LINE('MEMORIA INSUFICIENTE');
+    WHEN PROGRAM_ERROR THEN
+        DBMS_OUTPUT.PUT_LINE('PL/SQL TIENE UN PROBLEMA INTERNO');
+    WHEN NO_DATA_FOUND THEN
+        DBMS_OUTPUT.PUT_LINE('SELECT NO RETORNA DATOS');
 END insersion_jugadores;
 /
 BEGIN
@@ -554,6 +599,15 @@ CREATE OR REPLACE PROCEDURE insersion_partidos(
 BEGIN
     INSERT INTO partido
     VALUES(sec_partido.nextval,p_equipoA,p_equipoB,p_lugar,v_fecha);
+EXCEPTION
+    WHEN DUP_VAL_ON_INDEX THEN
+        DBMS_OUTPUT.PUT_LINE('INSERCION DUPLICADA');
+    WHEN STORAGE_ERROR THEN
+        DBMS_OUTPUT.PUT_LINE('MEMORIA INSUFICIENTE');
+    WHEN PROGRAM_ERROR THEN
+        DBMS_OUTPUT.PUT_LINE('PL/SQL TIENE UN PROBLEMA INTERNO');
+    WHEN NO_DATA_FOUND THEN
+        DBMS_OUTPUT.PUT_LINE('SELECT NO RETORNA DATOS');
 END insersion_partidos;
 /
 BEGIN
@@ -581,6 +635,15 @@ CREATE OR REPLACE PROCEDURE insersion_estadistica_p(
 BEGIN
     INSERT INTO estadistica_partido
     VALUES(sec_estadistica_partido.nextval,p_id_partido,0,0,'indefinido','I');
+EXCEPTION
+    WHEN DUP_VAL_ON_INDEX THEN
+        DBMS_OUTPUT.PUT_LINE('INSERCION DUPLICADA');
+    WHEN STORAGE_ERROR THEN
+        DBMS_OUTPUT.PUT_LINE('MEMORIA INSUFICIENTE');
+    WHEN PROGRAM_ERROR THEN
+        DBMS_OUTPUT.PUT_LINE('PL/SQL TIENE UN PROBLEMA INTERNO');
+    WHEN NO_DATA_FOUND THEN
+        DBMS_OUTPUT.PUT_LINE('SELECT NO RETORNA DATOS');
 END insersion_estadistica_p;
 /
 BEGIN
@@ -625,6 +688,15 @@ CREATE OR REPLACE TRIGGER actualizacion_partido
             ganador = v_ganador,
             status = 'F'
         WHERE id_partido = :new.id_partido;
+    EXCEPTION
+        WHEN DUP_VAL_ON_INDEX THEN
+            DBMS_OUTPUT.PUT_LINE('INSERCION DUPLICADA.');
+        WHEN STORAGE_ERROR THEN
+            DBMS_OUTPUT.PUT_LINE('MEMORIA INSUFICIENTE.');
+        WHEN STORAGE_ERROR THEN
+            DBMS_OUTPUT.PUT_LINE('PL/SQL TIENE UN PROBLEMA INTERNO');
+        WHEN NO_DATA_FOUND THEN
+            DBMS_OUTPUT.PUT_LINE('SELECT NO RETORNA DATOS');
 END actualizacion_partido;
 /
 CREATE OR REPLACE PROCEDURE insersion_partido_equipo(
@@ -635,6 +707,15 @@ CREATE OR REPLACE PROCEDURE insersion_partido_equipo(
 BEGIN
     INSERT INTO estadistica_partido_equipo
     VALUES(p_id_partido,p_id_equipo,p_goles,p_resultado);
+EXCEPTION
+    WHEN DUP_VAL_ON_INDEX THEN
+        DBMS_OUTPUT.PUT_LINE('INSERCION DUPLICADA');
+    WHEN STORAGE_ERROR THEN
+        DBMS_OUTPUT.PUT_LINE('MEMORIA INSUFICIENTE');
+    WHEN PROGRAM_ERROR THEN
+        DBMS_OUTPUT.PUT_LINE('PL/SQL TIENE UN PROBLEMA INTERNO');
+    WHEN NO_DATA_FOUND THEN
+        DBMS_OUTPUT.PUT_LINE('SELECT NO RETORNA DATOS');
 END insersion_partido_equipo;
 /
 BEGIN
@@ -682,6 +763,15 @@ CREATE OR REPLACE PROCEDURE insersion_estadistica_equipo(
 BEGIN
     INSERT INTO estadistica_equipo
     VALUES (sec_estadistica_equipo.nextval,p_id_equipo,0,0,0);
+EXCEPTION
+    WHEN DUP_VAL_ON_INDEX THEN
+        DBMS_OUTPUT.PUT_LINE('INSERCION DUPLICADA');
+    WHEN STORAGE_ERROR THEN
+        DBMS_OUTPUT.PUT_LINE('MEMORIA INSUFICIENTE');
+    WHEN PROGRAM_ERROR THEN
+        DBMS_OUTPUT.PUT_LINE('PL/SQL TIENE UN PROBLEMA INTERNO');
+    WHEN NO_DATA_FOUND THEN
+        DBMS_OUTPUT.PUT_LINE('SELECT NO RETORNA DATOS');
 END insersion_estadistica_equipo;
 /
 BEGIN
@@ -730,6 +820,15 @@ BEGIN
             END IF;
         END LOOP;
     CLOSE c_actualizar;
+EXCEPTION
+    WHEN DUP_VAL_ON_INDEX THEN
+        DBMS_OUTPUT.PUT_LINE('INSERCION DUPLICADA');
+    WHEN STORAGE_ERROR THEN
+        DBMS_OUTPUT.PUT_LINE('MEMORIA INSUFICIENTE');
+    WHEN PROGRAM_ERROR THEN
+        DBMS_OUTPUT.PUT_LINE('PL/SQL TIENE UN PROBLEMA INTERNO');
+    WHEN NO_DATA_FOUND THEN
+        DBMS_OUTPUT.PUT_LINE('SELECT NO RETORNA DATOS');
 END act_estadistica_equipo;
 /
 BEGIN
@@ -743,6 +842,15 @@ CREATE OR REPLACE PROCEDURE insersion_arbitro_partido(
 BEGIN
     INSERT INTO arbitro_partido
     VALUES(p_id_arbitro,p_id_partido,p_id_tipo_arbitro,0,0);
+EXCEPTION
+    WHEN DUP_VAL_ON_INDEX THEN
+        DBMS_OUTPUT.PUT_LINE('INSERCION DUPLICADA');
+    WHEN STORAGE_ERROR THEN
+        DBMS_OUTPUT.PUT_LINE('MEMORIA INSUFICIENTE');
+    WHEN PROGRAM_ERROR THEN
+        DBMS_OUTPUT.PUT_LINE('PL/SQL TIENE UN PROBLEMA INTERNO');
+    WHEN NO_DATA_FOUND THEN
+        DBMS_OUTPUT.PUT_LINE('SELECT NO RETORNA DATOS');
 END insersion_arbitro_partido;
 /
 BEGIN
@@ -821,6 +929,15 @@ CREATE OR REPLACE TRIGGER act_esta_jugador_arbitro
         SET tarjetas_amarillas = tarjetas_amarillas + :new.tarjetas_amarillas,
             tarjetas_rojas = tarjetas_rojas + :new.tarjetas_rojas
         WHERE id_partido = :new.id_partido;
+    EXCEPTION
+        WHEN DUP_VAL_ON_INDEX THEN
+            DBMS_OUTPUT.PUT_LINE('INSERCION DUPLICADA');
+        WHEN STORAGE_ERROR THEN
+            DBMS_OUTPUT.PUT_LINE('MEMORIA INSUFICIENTE');
+        WHEN PROGRAM_ERROR THEN
+            DBMS_OUTPUT.PUT_LINE('PL/SQL TIENE UN PROBLEMA INTERNO');
+        WHEN NO_DATA_FOUND THEN
+            DBMS_OUTPUT.PUT_LINE('SELECT NO RETORNA DATOS');
 END act_esta_jugador_arbitro;
 /
 CREATE OR REPLACE PROCEDURE ins_estadistica_jugador_p(
@@ -833,6 +950,15 @@ CREATE OR REPLACE PROCEDURE ins_estadistica_jugador_p(
 BEGIN
     INSERT INTO estadistica_jugador_partido
     VALUES(p_id_jugador,p_id_partido,contprocedimiento2.nextval,p_goles,p_tarjetas_amarillas,p_tarjetas_rojas,p_tiempo);
+EXCEPTION
+    WHEN DUP_VAL_ON_INDEX THEN
+        DBMS_OUTPUT.PUT_LINE('INSERCION DUPLICADA');
+    WHEN STORAGE_ERROR THEN
+        DBMS_OUTPUT.PUT_LINE('MEMORIA INSUFICIENTE');
+    WHEN PROGRAM_ERROR THEN
+        DBMS_OUTPUT.PUT_LINE('PL/SQL TIENE UN PROBLEMA INTERNO');
+    WHEN NO_DATA_FOUND THEN
+        DBMS_OUTPUT.PUT_LINE('SELECT NO RETORNA DATOS');
 END ins_estadistica_jugador_p;
 /
 BEGIN 
@@ -1292,7 +1418,9 @@ select v.id_partido as "Codigo partido",l.nombre as "Equipo local",v.nombre as "
 from local l, visitante v,estadistica_partido a
 where l.id_partido = v.id_partido and a.id_partido=v.id_partido
 order by v.fecha;
-
+CREATE OR REPLACE VIEW estadistica_partidos AS
+select goles as "Goles totales",tiempo_min as "Tiempo total del partido", ganador as "Ganador del partido"
+from estadistica_partido ;
 
 
 
