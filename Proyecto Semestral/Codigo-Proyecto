@@ -693,7 +693,7 @@ CREATE OR REPLACE TRIGGER actualizacion_partido
             DBMS_OUTPUT.PUT_LINE('INSERCION DUPLICADA.');
         WHEN STORAGE_ERROR THEN
             DBMS_OUTPUT.PUT_LINE('MEMORIA INSUFICIENTE.');
-        WHEN STORAGE_ERROR THEN
+        WHEN PROGRAM_ERROR THEN
             DBMS_OUTPUT.PUT_LINE('PL/SQL TIENE UN PROBLEMA INTERNO');
         WHEN NO_DATA_FOUND THEN
             DBMS_OUTPUT.PUT_LINE('SELECT NO RETORNA DATOS');
@@ -1420,7 +1420,6 @@ where l.id_partido = v.id_partido and a.id_partido=v.id_partido
 order by v.fecha;
 CREATE OR REPLACE VIEW estadistica_partidos AS
 select goles as "Goles totales",tiempo_min as "Tiempo total del partido", ganador as "Ganador del partido"
-from estadistica_partido ;
-
-
-
+from estadistica_partido;
+set linesize 300;
+set pagesize 500;
